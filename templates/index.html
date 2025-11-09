@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cost Accounting - Reciprocal Method</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .section-title {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .dept-setup {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .dept-list {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .dept-list h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .dept-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        
+        .dept-item input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .dept-item button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .add-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .primary-costs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .cost-input {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .cost-input label {
+            display: block;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        
+        .cost-input input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .service-units-table {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            margin-top: 15px;
+        }
+        
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+        
+        td input {
+            width: 80px;
+            padding: 5px;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .row-label {
+            background: #f0f0f0;
+            font-weight: 600;
+            text-align: left !important;
+            padding-left: 15px !important;
+        }
+        
+        .calculate-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-weight: 600;
+        }
+        
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .results {
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .result-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .result-card h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .detail-section h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .allocation-detail {
+            padding: 5px 0;
+            color: #666;
+        }
+        
+        .total-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧮 Cost Accounting - Reciprocal Method</h1>
+        <p class="subtitle">Risoluzione generica di esercizi con Simultaneous Equations</p>
+        
+        <!-- STEP 1: Definizione Dipartimenti -->
+        <div class="section">
+            <div class="section-title"><span class="step-number">1</span>Definisci i Dipartimenti</div>
+            <div class="dept-setup">
+                <div class="dept-list">
+                    <h3>🔧 Dipartimenti di Supporto</h3>
+                    <div id="supportDeptsList"></div>
+                    <button class="add-btn" onclick="addSupportDept()">+ Aggiungi Support</button>
+                </div>
+                <div class="dept-list">
+                    <h3>🏭 Dipartimenti di Produzione</h3>
+                    <div id="productionDeptsList"></div>
+                    <button class="add-btn" onclick="addProductionDept()">+ Aggiungi Production</button>
+                </div>
+            </div>
+            <button class="calculate-btn" onclick="setupCosts()">Conferma Dipartimenti →</button>
+        </div>
+        
+        <!-- STEP 2: Costi Primari -->
+        <div class="section" id="step2" style="display: none;">
+            <div class="section-title"><span class="step-number">2</span>Inserisci i Costi Primari (Primary Allocation)</div>
+            <div id="primaryCostsSection"></div>
+            <button class="calculate-btn" onclick="setupServiceUnits()" style="margin-top: 15px;">Conferma Costi →</button>
+        </div>
+        
+        <!-- STEP 3: Unità di Servizio -->
+        <div class="section" id="step3" style="display: none;">
+            <div class="section-title"><span class="step-number">3</span>Inserisci le Unità di Servizio Rese</div>
+            <div class="service-units-table" id="serviceUnitsSection"></div>
+            <button class="calculate-btn" onclick="setupAllocationBases()" style="margin-top: 15px;">Conferma Unità →</button>
+        </div>
+        
+        <!-- STEP 4: Basi di Allocazione (Opzionale) -->
+        <div class="section" id="step4" style="display: none;">
+            <div class="section-title"><span class="step-number">4</span>Basi di Allocazione per Production (Opzionale)</div>
+            <p style="margin-bottom: 15px; color: #666;">Inserisci le basi (es. w.u, machine hours) per calcolare i cost rates dei dipartimenti di produzione</p>
+            <div id="allocationBasesSection"></div>
+            <button class="calculate-btn" onclick="calculate()" style="margin-top: 15px;">🧮 Calcola Risultati</button>
+        </div>
+        
+        <!-- RISULTATI -->
+        <div class="results" id="results">
+            <div class="section-title">📊 Risultati</div>
+            
+            <div class="results-grid">
+                <div class="result-card">
+                    <h3>Dipartimenti di Supporto</h3>
+                    <div id="supportResults"></div>
+                </div>
+                
+                <div class="result-card">
+                    <h3>Dipartimenti di Produzione</h3>
+                    <div id="productionResults"></div>
+                </div>
+            </div>
+            
+            <div id="detailsSection"></div>
+            
+            <div class="total-banner" id="totalBanner"></div>
+        </div>
+    </div>
+    
+    <script>
+        let supportDepts = [];
+        let productionDepts = [];
+        
+        // Inizializza con esempio
+        function init() {
+            supportDepts = ['Maintenance', 'Administration', 'Marketing'];
+            productionDepts = ['Production', 'Painting'];
+            renderDepts();
+        }
+        
+        function renderDepts() {
+            // Support
+            let html = '';
+            supportDepts.forEach((dept, idx) => {
+                html += `
+                    <div class="dept-item">
+                        <input type="text" value="${dept}" onchange="updateSupportDept(${idx}, this.value)">
+                        <button onclick="removeSupportDept(${idx})">✕</button>
+                    </div>
+                `;
+            });
+            document.getElementById('supportDeptsList').innerHTML = html;
+            
+            // Production
+            html = '';
+            productionDepts.forEach((dept, idx) => {
+                html += `
+                    <div class="dept-item">
+                        <input type="text" value="${dept}" onchange="updateProductionDept(${idx}, this.value)">
+                        <button onclick="removeProductionDept(${idx})">✕</button>
+                    </div>
+                `;
+            });
+            document.getElementById('productionDeptsList').innerHTML = html;
+        }
+        
+        function addSupportDept() {
+            supportDepts.push('Support ' + (supportDepts.length + 1));
+            renderDepts();
+        }
+        
+        function addProductionDept() {
+            productionDepts.push('Production ' + (productionDepts.length + 1));
+            renderDepts();
+        }
+        
+        function updateSupportDept(idx, value) {
+            supportDepts[idx] = value;
+        }
+        
+        function updateProductionDept(idx, value) {
+            productionDepts[idx] = value;
+        }
+        
+        function removeSupportDept(idx) {
+            supportDepts.splice(idx, 1);
+            renderDepts();
+        }
+        
+        function removeProductionDept(idx) {
+            productionDepts.splice(idx, 1);
+            renderDepts();
+        }
+        
+        function setupCosts() {
+            let html = '<div class="primary-costs">';
+            
+            supportDepts.forEach(dept => {
+                html += `
+                    <div class="cost-input">
+                        <label>${dept}</label>
+                        <input type="number" id="cost-${dept}" value="100" step="0.01">
+                    </div>
+                `;
+            });
+            
+            productionDepts.forEach(dept => {
+                html += `
+                    <div class="cost-input">
+                        <label>${dept}</label>
+                        <input type="number" id="cost-${dept}" value="200" step="0.01">
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            document.getElementById('primaryCostsSection').innerHTML = html;
+            document.getElementById('step2').style.display = 'block';
+            document.getElementById('step2').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function setupServiceUnits() {
+            const allDepts = [...supportDepts, ...productionDepts];
+            
+            let html = '<table><thead><tr><th>Da / A</th>';
+            allDepts.forEach(dept => {
+                html += `<th>${dept}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            supportDepts.forEach(fromDept => {
+                html += `<tr><td class="row-label">${fromDept}</td>`;
+                allDepts.forEach(toDept => {
+                    const disabled = fromDept === toDept ? 'disabled' : '';
+                    const value = fromDept === toDept ? '0' : '100';
+                    html += `<td><input type="number" id="units-${fromDept}-${toDept}" value="${value}" ${disabled} min="0" step="1"></td>`;
+                });
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table>';
+            document.getElementById('serviceUnitsSection').innerHTML = html;
+            document.getElementById('step3').style.display = 'block';
+            document.getElementById('step3').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function setupAllocationBases() {
+            let html = '<div class="primary-costs">';
+            
+            productionDepts.forEach(dept => {
+                html += `
+                    <div class="cost-input">
+                        <label>${dept} (w.u / machine hours)</label>
+                        <input type="number" id="base-${dept}" value="300" step="0.01">
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            document.getElementById('allocationBasesSection').innerHTML = html;
+            document.getElementById('step4').style.display = 'block';
+            document.getElementById('step4').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function calculate() {
+            // Raccogli i dati
+            const support_depts = {};
+            const production_depts = {};
+            const service_units = {};
+            const allocation_bases = {};
+            
+            supportDepts.forEach(dept => {
+                support_depts[dept] = parseFloat(document.getElementById(`cost-${dept}`).value);
+            });
+            
+            productionDepts.forEach(dept => {
+                production_depts[dept] = parseFloat(document.getElementById(`cost-${dept}`).value);
+                const baseInput = document.getElementById(`base-${dept}`);
+                if (baseInput && baseInput.value) {
+                    allocation_bases[dept] = parseFloat(baseInput.value);
+                }
+            });
+            
+            const allDepts = [...supportDepts, ...productionDepts];
+            supportDepts.forEach(fromDept => {
+                service_units[fromDept] = {};
+                allDepts.forEach(toDept => {
+                    const input = document.getElementById(`units-${fromDept}-${toDept}`);
+                    service_units[fromDept][toDept] = parseFloat(input.value) || 0;
+                });
+            });
+            
+            // Invia al server
+            fetch('/calculate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    support_depts,
+                    production_depts,
+                    service_units,
+                    allocation_bases
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayResults(data, support_depts, production_depts, allocation_bases);
+                } else {
+                    alert('Errore: ' + data.error);
+                }
+            });
+        }
+        
+        function displayResults(data, support_depts, production_depts, allocation_bases) {
+            // Support results
+            let supportHTML = '';
+            Object.entries(data.support_costs).forEach(([dept, cost]) => {
+                const direct = support_depts[dept];
+                const rate = data.support_rates[dept];
+                const units = data.support_total_units[dept];
+                supportHTML += `
+                    <div class="result-item">
+                        <span><strong>${dept}</strong></span>
+                        <span>€${cost.toFixed(2)}</span>
+                    </div>
+                    <div class="result-item" style="font-size: 0.9em; color: #666;">
+                        <span>Costo diretto</span>
+                        <span>€${direct.toFixed(2)}</span>
+                    </div>
+                    <div class="result-item" style="font-size: 0.9em; color: #666;">
+                        <span>Totale unità</span>
+                        <span>${units.toFixed(0)}</span>
+                    </div>
+                    <div class="result-item" style="font-size: 0.9em; color: #667eea; margin-bottom: 15px;">
+                        <span>Cost rate</span>
+                        <span>€${rate.toFixed(4)}/unit</span>
+                    </div>
+                `;
+            });
+            document.getElementById('supportResults').innerHTML = supportHTML;
+            
+            // Production results
+            let productionHTML = '';
+            Object.entries(data.production_costs).forEach(([dept, cost]) => {
+                const direct = production_depts[dept];
+                productionHTML += `
+                    <div class="result-item">
+                        <span><strong>${dept}</strong></span>
+                        <span>€${cost.toFixed(2)}</span>
+                    </div>
+                    <div class="result-item" style="font-size: 0.9em; color: #666;">
+                        <span>Costo diretto</span>
+                        <span>€${direct.toFixed(2)}</span>
+                    </div>
+                    <div class="result-item" style="font-size: 0.9em; color: #666; margin-bottom: 15px;">
+                        <span>Allocato</span>
+                        <span>€${(cost - direct).toFixed(2)}</span>
+                    </div>
+                `;
+                
+                if (data.production_rates[dept]) {
+                    productionHTML += `
+                        <div class="result-item" style="font-size: 0.9em; color: #667eea; margin-bottom: 15px;">
+                            <span>Cost rate</span>
+                            <span>€${data.production_rates[dept].toFixed(4)}/w.u</span>
+                        </div>
+                    `;
+                }
+            });
+            document.getElementById('productionResults').innerHTML = productionHTML;
+            
+            // Details
+            let detailsHTML = '';
+            Object.entries(data.production_details).forEach(([dept, details]) => {
+                detailsHTML += `
+                    <div class="detail-section">
+                        <h4>${dept} - Dettaglio Allocazioni</h4>
+                        <div class="allocation-detail">Costo diretto: €${production_depts[dept].toFixed(2)}</div>
+                `;
+                details.forEach(detail => {
+                    detailsHTML += `
+                        <div class="allocation-detail">
+                            Da ${detail.from}: ${detail.units} units × €${detail.rate.toFixed(4)}/unit = €${detail.allocated.toFixed(2)}
+                        </div>
+                    `;
+                });
+                detailsHTML += `
+                        <div class="allocation-detail" style="font-weight: 600; color: #667eea; margin-top: 10px;">
+                            TOTALE: €${data.production_costs[dept].toFixed(2)}
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('detailsSection').innerHTML = detailsHTML;
+            
+            // Total
+            document.getElementById('totalBanner').textContent = `TOTALE GENERALE: €${data.total.toFixed(2)}`;
+            
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Initialize
+        init();
+    </script>
+</body>
+</html>
