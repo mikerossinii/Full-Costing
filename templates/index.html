@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cost Accounting - Reciprocal Method</title>
+    <title>Cost Accounting Tools</title>
     <style>
         * {
             margin: 0;
@@ -13,17 +13,93 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
+            background: #f5f7fa;
             min-height: 100vh;
+            display: flex;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .logo {
+            padding: 0 25px 30px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 20px;
+        }
+        
+        .logo h1 {
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+        
+        .logo p {
+            font-size: 0.85em;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+        
+        .menu-item {
+            padding: 15px 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .menu-item:hover {
+            background: rgba(255,255,255,0.1);
+            border-left-color: white;
+        }
+        
+        .menu-item.active {
+            background: rgba(255,255,255,0.2);
+            border-left-color: white;
+            font-weight: 600;
+        }
+        
+        .menu-icon {
+            font-size: 1.3em;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        
+        .page {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .container {
-            max-width: 1600px;
+            max-width: 1400px;
             margin: 0 auto;
             background: white;
             border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
             padding: 30px;
         }
         
@@ -127,7 +203,7 @@
             margin-bottom: 5px;
         }
         
-        .cost-input input {
+        .cost-input input, .cost-input select {
             width: 100%;
             padding: 8px;
             border: 1px solid #ddd;
@@ -265,352 +341,185 @@
             margin-right: 10px;
             font-weight: 600;
         }
+        
+        .wip-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🧮 Cost Accounting - Reciprocal Method</h1>
-        <p class="subtitle">Risoluzione generica di esercizi con Simultaneous Equations</p>
-        
-        <!-- STEP 1: Definizione Dipartimenti -->
-        <div class="section">
-            <div class="section-title"><span class="step-number">1</span>Definisci i Dipartimenti</div>
-            <div class="dept-setup">
-                <div class="dept-list">
-                    <h3>🔧 Dipartimenti di Supporto</h3>
-                    <div id="supportDeptsList"></div>
-                    <button class="add-btn" onclick="addSupportDept()">+ Aggiungi Support</button>
-                </div>
-                <div class="dept-list">
-                    <h3>🏭 Dipartimenti di Produzione</h3>
-                    <div id="productionDeptsList"></div>
-                    <button class="add-btn" onclick="addProductionDept()">+ Aggiungi Production</button>
-                </div>
-            </div>
-            <button class="calculate-btn" onclick="setupCosts()">Conferma Dipartimenti →</button>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <h1>💼 Cost Accounting</h1>
+            <p>Professional Tools</p>
         </div>
         
-        <!-- STEP 2: Costi Primari -->
-        <div class="section" id="step2" style="display: none;">
-            <div class="section-title"><span class="step-number">2</span>Inserisci i Costi Primari (Primary Allocation)</div>
-            <div id="primaryCostsSection"></div>
-            <button class="calculate-btn" onclick="setupServiceUnits()" style="margin-top: 15px;">Conferma Costi →</button>
+        <div class="menu-item active" onclick="showPage('reciprocal')">
+            <span class="menu-icon">🔄</span>
+            <span>Reciprocal Method</span>
         </div>
         
-        <!-- STEP 3: Unità di Servizio -->
-        <div class="section" id="step3" style="display: none;">
-            <div class="section-title"><span class="step-number">3</span>Inserisci le Unità di Servizio Rese</div>
-            <div class="service-units-table" id="serviceUnitsSection"></div>
-            <button class="calculate-btn" onclick="setupAllocationBases()" style="margin-top: 15px;">Conferma Unità →</button>
-        </div>
-        
-        <!-- STEP 4: Basi di Allocazione (Opzionale) -->
-        <div class="section" id="step4" style="display: none;">
-            <div class="section-title"><span class="step-number">4</span>Basi di Allocazione per Production (Opzionale)</div>
-            <p style="margin-bottom: 15px; color: #666;">Inserisci le basi (es. w.u, machine hours) per calcolare i cost rates dei dipartimenti di produzione</p>
-            <div id="allocationBasesSection"></div>
-            <button class="calculate-btn" onclick="calculate()" style="margin-top: 15px;">🧮 Calcola Risultati</button>
-        </div>
-        
-        <!-- RISULTATI -->
-        <div class="results" id="results">
-            <div class="section-title">📊 Risultati</div>
-            
-            <div class="results-grid">
-                <div class="result-card">
-                    <h3>Dipartimenti di Supporto</h3>
-                    <div id="supportResults"></div>
-                </div>
-                
-                <div class="result-card">
-                    <h3>Dipartimenti di Produzione</h3>
-                    <div id="productionResults"></div>
-                </div>
-            </div>
-            
-            <div id="detailsSection"></div>
-            
-            <div class="total-banner" id="totalBanner"></div>
+        <div class="menu-item" onclick="showPage('wip')">
+            <span class="menu-icon">📦</span>
+            <span>WIP Valuation</span>
         </div>
     </div>
     
-    <script>
-        let supportDepts = [];
-        let productionDepts = [];
-        
-        // Inizializza con esempio
-        function init() {
-            supportDepts = ['Maintenance', 'Administration', 'Marketing'];
-            productionDepts = ['Production', 'Painting'];
-            renderDepts();
-        }
-        
-        function renderDepts() {
-            // Support
-            let html = '';
-            supportDepts.forEach((dept, idx) => {
-                html += `
-                    <div class="dept-item">
-                        <input type="text" value="${dept}" onchange="updateSupportDept(${idx}, this.value)">
-                        <button onclick="removeSupportDept(${idx})">✕</button>
-                    </div>
-                `;
-            });
-            document.getElementById('supportDeptsList').innerHTML = html;
-            
-            // Production
-            html = '';
-            productionDepts.forEach((dept, idx) => {
-                html += `
-                    <div class="dept-item">
-                        <input type="text" value="${dept}" onchange="updateProductionDept(${idx}, this.value)">
-                        <button onclick="removeProductionDept(${idx})">✕</button>
-                    </div>
-                `;
-            });
-            document.getElementById('productionDeptsList').innerHTML = html;
-        }
-        
-        function addSupportDept() {
-            supportDepts.push('Support ' + (supportDepts.length + 1));
-            renderDepts();
-        }
-        
-        function addProductionDept() {
-            productionDepts.push('Production ' + (productionDepts.length + 1));
-            renderDepts();
-        }
-        
-        function updateSupportDept(idx, value) {
-            supportDepts[idx] = value;
-        }
-        
-        function updateProductionDept(idx, value) {
-            productionDepts[idx] = value;
-        }
-        
-        function removeSupportDept(idx) {
-            supportDepts.splice(idx, 1);
-            renderDepts();
-        }
-        
-        function removeProductionDept(idx) {
-            productionDepts.splice(idx, 1);
-            renderDepts();
-        }
-        
-        function setupCosts() {
-            let html = '<div class="primary-costs">';
-            
-            supportDepts.forEach(dept => {
-                html += `
-                    <div class="cost-input">
-                        <label>${dept}</label>
-                        <input type="number" id="cost-${dept}" value="100" step="0.01">
-                    </div>
-                `;
-            });
-            
-            productionDepts.forEach(dept => {
-                html += `
-                    <div class="cost-input">
-                        <label>${dept}</label>
-                        <input type="number" id="cost-${dept}" value="200" step="0.01">
-                    </div>
-                `;
-            });
-            
-            html += '</div>';
-            document.getElementById('primaryCostsSection').innerHTML = html;
-            document.getElementById('step2').style.display = 'block';
-            document.getElementById('step2').scrollIntoView({ behavior: 'smooth' });
-        }
-        
-        function setupServiceUnits() {
-            const allDepts = [...supportDepts, ...productionDepts];
-            
-            let html = '<table><thead><tr><th>Da / A</th>';
-            allDepts.forEach(dept => {
-                html += `<th>${dept}</th>`;
-            });
-            html += '</tr></thead><tbody>';
-            
-            supportDepts.forEach(fromDept => {
-                html += `<tr><td class="row-label">${fromDept}</td>`;
-                allDepts.forEach(toDept => {
-                    const disabled = fromDept === toDept ? 'disabled' : '';
-                    const value = fromDept === toDept ? '0' : '100';
-                    html += `<td><input type="number" id="units-${fromDept}-${toDept}" value="${value}" ${disabled} min="0" step="1"></td>`;
-                });
-                html += '</tr>';
-            });
-            
-            html += '</tbody></table>';
-            document.getElementById('serviceUnitsSection').innerHTML = html;
-            document.getElementById('step3').style.display = 'block';
-            document.getElementById('step3').scrollIntoView({ behavior: 'smooth' });
-        }
-        
-        function setupAllocationBases() {
-            let html = '<div class="primary-costs">';
-            
-            productionDepts.forEach(dept => {
-                html += `
-                    <div class="cost-input">
-                        <label>${dept} (w.u / machine hours)</label>
-                        <input type="number" id="base-${dept}" value="300" step="0.01">
-                    </div>
-                `;
-            });
-            
-            html += '</div>';
-            document.getElementById('allocationBasesSection').innerHTML = html;
-            document.getElementById('step4').style.display = 'block';
-            document.getElementById('step4').scrollIntoView({ behavior: 'smooth' });
-        }
-        
-        function calculate() {
-            // Raccogli i dati
-            const support_depts = {};
-            const production_depts = {};
-            const service_units = {};
-            const allocation_bases = {};
-            
-            supportDepts.forEach(dept => {
-                support_depts[dept] = parseFloat(document.getElementById(`cost-${dept}`).value);
-            });
-            
-            productionDepts.forEach(dept => {
-                production_depts[dept] = parseFloat(document.getElementById(`cost-${dept}`).value);
-                const baseInput = document.getElementById(`base-${dept}`);
-                if (baseInput && baseInput.value) {
-                    allocation_bases[dept] = parseFloat(baseInput.value);
-                }
-            });
-            
-            const allDepts = [...supportDepts, ...productionDepts];
-            supportDepts.forEach(fromDept => {
-                service_units[fromDept] = {};
-                allDepts.forEach(toDept => {
-                    const input = document.getElementById(`units-${fromDept}-${toDept}`);
-                    service_units[fromDept][toDept] = parseFloat(input.value) || 0;
-                });
-            });
-            
-            // Invia al server
-            fetch('/calculate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    support_depts,
-                    production_depts,
-                    service_units,
-                    allocation_bases
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    displayResults(data, support_depts, production_depts, allocation_bases);
-                } else {
-                    alert('Errore: ' + data.error);
-                }
-            });
-        }
-        
-        function displayResults(data, support_depts, production_depts, allocation_bases) {
-            // Support results
-            let supportHTML = '';
-            Object.entries(data.support_costs).forEach(([dept, cost]) => {
-                const direct = support_depts[dept];
-                const rate = data.support_rates[dept];
-                const units = data.support_total_units[dept];
-                supportHTML += `
-                    <div class="result-item">
-                        <span><strong>${dept}</strong></span>
-                        <span>€${cost.toFixed(2)}</span>
-                    </div>
-                    <div class="result-item" style="font-size: 0.9em; color: #666;">
-                        <span>Costo diretto</span>
-                        <span>€${direct.toFixed(2)}</span>
-                    </div>
-                    <div class="result-item" style="font-size: 0.9em; color: #666;">
-                        <span>Totale unità</span>
-                        <span>${units.toFixed(0)}</span>
-                    </div>
-                    <div class="result-item" style="font-size: 0.9em; color: #667eea; margin-bottom: 15px;">
-                        <span>Cost rate</span>
-                        <span>€${rate.toFixed(4)}/unit</span>
-                    </div>
-                `;
-            });
-            document.getElementById('supportResults').innerHTML = supportHTML;
-            
-            // Production results
-            let productionHTML = '';
-            Object.entries(data.production_costs).forEach(([dept, cost]) => {
-                const direct = production_depts[dept];
-                productionHTML += `
-                    <div class="result-item">
-                        <span><strong>${dept}</strong></span>
-                        <span>€${cost.toFixed(2)}</span>
-                    </div>
-                    <div class="result-item" style="font-size: 0.9em; color: #666;">
-                        <span>Costo diretto</span>
-                        <span>€${direct.toFixed(2)}</span>
-                    </div>
-                    <div class="result-item" style="font-size: 0.9em; color: #666; margin-bottom: 15px;">
-                        <span>Allocato</span>
-                        <span>€${(cost - direct).toFixed(2)}</span>
-                    </div>
-                `;
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Reciprocal Method Page -->
+        <div id="reciprocal-page" class="page active">
+            <div class="container">
+                <h1>🔄 Reciprocal Method</h1>
+                <p class="subtitle">Risoluzione di esercizi con Simultaneous Equations</p>
                 
-                if (data.production_rates[dept]) {
-                    productionHTML += `
-                        <div class="result-item" style="font-size: 0.9em; color: #667eea; margin-bottom: 15px;">
-                            <span>Cost rate</span>
-                            <span>€${data.production_rates[dept].toFixed(4)}/w.u</span>
+                <div class="section">
+                    <div class="section-title"><span class="step-number">1</span>Definisci i Dipartimenti</div>
+                    <div class="dept-setup">
+                        <div class="dept-list">
+                            <h3>🔧 Dipartimenti di Supporto</h3>
+                            <div id="supportDeptsList"></div>
+                            <button class="add-btn" onclick="addSupportDept()">+ Aggiungi Support</button>
                         </div>
-                    `;
-                }
-            });
-            document.getElementById('productionResults').innerHTML = productionHTML;
-            
-            // Details
-            let detailsHTML = '';
-            Object.entries(data.production_details).forEach(([dept, details]) => {
-                detailsHTML += `
-                    <div class="detail-section">
-                        <h4>${dept} - Dettaglio Allocazioni</h4>
-                        <div class="allocation-detail">Costo diretto: €${production_depts[dept].toFixed(2)}</div>
-                `;
-                details.forEach(detail => {
-                    detailsHTML += `
-                        <div class="allocation-detail">
-                            Da ${detail.from}: ${detail.units} units × €${detail.rate.toFixed(4)}/unit = €${detail.allocated.toFixed(2)}
-                        </div>
-                    `;
-                });
-                detailsHTML += `
-                        <div class="allocation-detail" style="font-weight: 600; color: #667eea; margin-top: 10px;">
-                            TOTALE: €${data.production_costs[dept].toFixed(2)}
+                        <div class="dept-list">
+                            <h3>🏭 Dipartimenti di Produzione</h3>
+                            <div id="productionDeptsList"></div>
+                            <button class="add-btn" onclick="addProductionDept()">+ Aggiungi Production</button>
                         </div>
                     </div>
-                `;
-            });
-            document.getElementById('detailsSection').innerHTML = detailsHTML;
-            
-            // Total
-            document.getElementById('totalBanner').textContent = `TOTALE GENERALE: €${data.total.toFixed(2)}`;
-            
-            document.getElementById('results').style.display = 'block';
-            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
-        }
+                    <button class="calculate-btn" onclick="setupCosts()">Conferma Dipartimenti →</button>
+                </div>
+                
+                <div class="section" id="step2" style="display: none;">
+                    <div class="section-title"><span class="step-number">2</span>Inserisci i Costi Primari</div>
+                    <div id="primaryCostsSection"></div>
+                    <button class="calculate-btn" onclick="setupServiceUnits()" style="margin-top: 15px;">Conferma Costi →</button>
+                </div>
+                
+                <div class="section" id="step3" style="display: none;">
+                    <div class="section-title"><span class="step-number">3</span>Inserisci le Unità di Servizio Rese</div>
+                    <div class="service-units-table" id="serviceUnitsSection"></div>
+                    <button class="calculate-btn" onclick="setupAllocationBases()" style="margin-top: 15px;">Conferma Unità →</button>
+                </div>
+                
+                <div class="section" id="step4" style="display: none;">
+                    <div class="section-title"><span class="step-number">4</span>Basi di Allocazione (Opzionale)</div>
+                    <p style="margin-bottom: 15px; color: #666;">Inserisci le basi (es. w.u, machine hours) per calcolare i cost rates</p>
+                    <div id="allocationBasesSection"></div>
+                    <button class="calculate-btn" onclick="calculateReciprocal()" style="margin-top: 15px;">🧮 Calcola Risultati</button>
+                </div>
+                
+                <div class="results" id="reciprocalResults">
+                    <div class="section-title">📊 Risultati</div>
+                    <div class="results-grid">
+                        <div class="result-card">
+                            <h3>Dipartimenti di Supporto</h3>
+                            <div id="supportResults"></div>
+                        </div>
+                        <div class="result-card">
+                            <h3>Dipartimenti di Produzione</h3>
+                            <div id="productionResults"></div>
+                        </div>
+                    </div>
+                    <div id="detailsSection"></div>
+                    <div class="total-banner" id="totalBanner"></div>
+                </div>
+            </div>
+        </div>
         
-        // Initialize
-        init();
-    </script>
+        <!-- WIP Valuation Page -->
+        <div id="wip-page" class="page">
+            <div class="container">
+                <h1>📦 WIP Valuation</h1>
+                <p class="subtitle">Calcolo della valutazione del Work in Process</p>
+                
+                <div class="section">
+                    <div class="section-title"><span class="step-number">1</span>Configurazione Base</div>
+                    <div class="wip-grid">
+                        <div class="cost-input">
+                            <label>Metodo di Valutazione</label>
+                            <select id="wipMethod">
+                                <option value="FIFO">FIFO (First In First Out)</option>
+                                <option value="LIFO">LIFO (Last In First Out)</option>
+                                <option value="AVG">Average Cost</option>
+                            </select>
+                        </div>
+                        <div class="cost-input">
+                            <label>Nome Dipartimento</label>
+                            <input type="text" id="wipDeptName" value="Sewing" placeholder="es. Sewing">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title"><span class="step-number">2</span>Costi del Periodo</div>
+                    <div class="wip-grid">
+                        <div class="cost-input">
+                            <label>Materials (€)</label>
+                            <input type="number" id="wipMaterials" value="14400" step="0.01">
+                        </div>
+                        <div class="cost-input">
+                            <label>Indirect Conversion Costs (€)</label>
+                            <input type="number" id="wipConversion" value="23400" step="0.01">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title"><span class="step-number">3</span>Opening Work in Process</div>
+                    <div class="wip-grid">
+                        <div class="cost-input">
+                            <label>Unità in WIP Iniziale</label>
+                            <input type="number" id="wipOpeningUnits" value="20" step="1">
+                        </div>
+                        <div class="cost-input">
+                            <label>Completion % (CC%)</label>
+                            <input type="number" id="wipOpeningCC" value="50" step="1" min="0" max="100">
+                        </div>
+                        <div class="cost-input">
+                            <label>Costo Materials WIP (€)</label>
+                            <input type="number" id="wipOpeningMaterials" value="1320" step="0.01">
+                        </div>
+                        <div class="cost-input">
+                            <label>Costo Conversion WIP (€)</label>
+                            <input type="number" id="wipOpeningConversion" value="2160" step="0.01">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title"><span class="step-number">4</span>Movimenti del Periodo</div>
+                    <div class="wip-grid">
+                        <div class="cost-input">
+                            <label>Unità Started</label>
+                            <input type="number" id="wipStarted" value="400" step="1">
+                        </div>
+                        <div class="cost-input">
+                            <label>Unità Completed</label>
+                            <input type="number" id="wipCompleted" value="350" step="1">
+                        </div>
+                        <div class="cost-input">
+                            <label>Ending WIP CC%</label>
+                            <input type="number" id="wipEndingCC" value="60" step="1" min="0" max="100">
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="calculate-btn" onclick="calculateWIP()">🧮 Calcola WIP Valuation</button>
+                </div>
+                
+                <div class="results" id="wipResults">
+                    <div class="section-title">📊 Risultati WIP</div>
+                    <div id="wipResultsContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/app.js"></script>
 </body>
 </html>

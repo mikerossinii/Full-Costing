@@ -127,6 +127,104 @@ def calculate():
             'error': str(e)
         })
 
+@app.route('/calculate_wip', methods=['POST'])
+def calculate_wip():
+    data = request.json
+    
+    try:
+        method = data['method']
+        materials = data['materials']
+        conversion = data['conversion']
+        opening_units = data['opening_units']
+        opening_cc = data['opening_cc'] / 100.0
+        opening_materials = data['opening_materials']
+        opening_conversion = data['opening_conversion']
+        started = data['started']
+        completed = data['completed']
+        ending_cc = data['ending_cc'] / 100.0
+        
+        # Calculate ending WIP units
+        ending_wip = opening_units + started - completed
+        
+        # Calculate equivalent units based on method
+        if method == 'FIFO':
+            # FIFO: separate opening WIP work from current period work
+            eu_materials = completed - opening_units + (ending_wip * 1.0)
+            eu_conversion = (opening_units * (1 - opening_cc)) + (completed - opening_units) + (ending_wip * ending_cc)
+            
+            # Cost per EU (only current period costs)
+            cost_per_eu_materials = materials / eu_materials
+            cost_per_eu_conversion = conversion / eu_conversion
+            
+            # Valuation
+            finished_goods = opening_materials + opening_conversion + \
+                           (opening_units * (1 - opening_cc) * cost_per_eu_conversion) + \
+                           ((completed - opening_units) * (cost_per_eu_materials + cost_per_eu_conversion))
+            
+        elif method == 'AVG':
+            # Average: combine opening WIP with current period
+            total_materials_cost = opening_materials + materials
+            total_conversion_cost = opening_conversion + conversion
+            
+            eu_materials = completed + ending_wip
+            eu_conversion = completed + (ending_wip * ending_cc)
+            
+            cost_per_eu_materials = total_materials_cost / eu_materials
+            cost_per_eu_conversion = total_conversion_cost / eu_conversion
+            
+            finished_goods = completed * (cost_per_eu_materials + cost_per_eu_conversion)
+            
+        else:  # LIFO
+            # LIFO: assume most recent costs go to completed units
+            eu_materials = completed + ending_wip
+            eu_conversion = completed + (ending_wip * ending_cc)
+            
+            cost_per_eu_materials = materials / started
+            cost_per_eu_conversion = conversion / (started + (opening_units * opening_cc))
+            
+            finished_goods = completed * (cost_per_eu_materials + cost_per_eu_conversion)
+        
+        # Ending WIP valuation
+        ending_wip_materials = ending_wip * cost_per_eu_materials
+        ending_wip_conversion = ending_wip * ending_cc * cost_per_eu_conversion
+        ending_wip_total = ending_wip_materials + ending_wip_conversion
+        
+        # Total costs
+        total_costs = opening_materials + opening_conversion + materials + conversion
+        
+        return jsonify({
+            'success': True,
+            'method': method,
+            'physical_flow': {
+                'opening_wip': opening_units,
+                'started': started,
+                'completed': completed,
+                'ending_wip': ending_wip
+            },
+            'equivalent_units': {
+                'materials': float(eu_materials),
+                'conversion': float(eu_conversion)
+            },
+            'cost_per_eu': {
+                'materials': float(cost_per_eu_materials),
+                'conversion': float(cost_per_eu_conversion),
+                'total': float(cost_per_eu_materials + cost_per_eu_conversion)
+            },
+            'valuation': {
+                'finished_goods': float(finished_goods),
+                'ending_wip_materials': float(ending_wip_materials),
+                'ending_wip_conversion': float(ending_wip_conversion),
+                'ending_wip_total': float(ending_wip_total)
+            },
+            'total_costs': float(total_costs)
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        })
+
 if __name__ == '__main__':
     import os
     port = int(os.environ.get("PORT", 5000))
