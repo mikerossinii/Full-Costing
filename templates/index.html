@@ -347,24 +347,75 @@
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
         }
+        
+        /* Language Selector */
+        .lang-selector {
+            padding: 20px 25px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            margin-top: 20px;
+        }
+        
+        .lang-selector p {
+            font-size: 0.85em;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+        
+        .lang-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .lang-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.2s;
+        }
+        
+        .lang-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .lang-btn.active {
+            background: white;
+            color: #667eea;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="logo">
-            <h1>💼 Cost Accounting</h1>
-            <p>Professional Tools</p>
+            <h1>💼 <span data-i18n="appTitle">Cost Accounting</span></h1>
+            <p data-i18n="appSubtitle">Professional Tools</p>
         </div>
         
         <div class="menu-item active" onclick="showPage('reciprocal')">
             <span class="menu-icon">🔄</span>
-            <span>Reciprocal Method</span>
+            <span data-i18n="reciprocalMethod">Reciprocal Method</span>
         </div>
         
         <div class="menu-item" onclick="showPage('wip')">
             <span class="menu-icon">📦</span>
-            <span>WIP Valuation</span>
+            <span data-i18n="wipValuation">WIP Valuation</span>
+        </div>
+        
+        <div class="lang-selector">
+            <p>🌐 Language / Lingua</p>
+            <div class="lang-buttons">
+                <button class="lang-btn active" data-lang="it" onclick="setLanguage('it')">IT</button>
+                <button class="lang-btn" data-lang="en" onclick="setLanguage('en')">EN</button>
+                <button class="lang-btn" data-lang="fr" onclick="setLanguage('fr')">FR</button>
+                <button class="lang-btn" data-lang="es" onclick="setLanguage('es')">ES</button>
+                <button class="lang-btn" data-lang="ca" onclick="setLanguage('ca')">CA</button>
+            </div>
         </div>
     </div>
     
@@ -373,24 +424,24 @@
         <!-- Reciprocal Method Page -->
         <div id="reciprocal-page" class="page active">
             <div class="container">
-                <h1>🔄 Reciprocal Method</h1>
-                <p class="subtitle">Risoluzione di esercizi con Simultaneous Equations</p>
+                <h1>🔄 <span data-i18n="reciprocalTitle">Reciprocal Method</span></h1>
+                <p class="subtitle" data-i18n="reciprocalSubtitle">Risoluzione di esercizi con Simultaneous Equations</p>
                 
                 <div class="section">
-                    <div class="section-title"><span class="step-number">1</span>Definisci i Dipartimenti</div>
+                    <div class="section-title"><span class="step-number">1</span><span data-i18n="step1Title">Definisci i Dipartimenti</span></div>
                     <div class="dept-setup">
                         <div class="dept-list">
-                            <h3>🔧 Dipartimenti di Supporto</h3>
+                            <h3>🔧 <span data-i18n="supportDepts">Dipartimenti di Supporto</span></h3>
                             <div id="supportDeptsList"></div>
-                            <button class="add-btn" onclick="addSupportDept()">+ Aggiungi Support</button>
+                            <button class="add-btn" onclick="addSupportDept()" data-i18n="addSupport">+ Aggiungi Support</button>
                         </div>
                         <div class="dept-list">
-                            <h3>🏭 Dipartimenti di Produzione</h3>
+                            <h3>🏭 <span data-i18n="productionDepts">Dipartimenti di Produzione</span></h3>
                             <div id="productionDeptsList"></div>
-                            <button class="add-btn" onclick="addProductionDept()">+ Aggiungi Production</button>
+                            <button class="add-btn" onclick="addProductionDept()" data-i18n="addProduction">+ Aggiungi Production</button>
                         </div>
                     </div>
-                    <button class="calculate-btn" onclick="setupCosts()">Conferma Dipartimenti →</button>
+                    <button class="calculate-btn" onclick="setupCosts()" data-i18n="confirmDepts">Conferma Dipartimenti →</button>
                 </div>
                 
                 <div class="section" id="step2" style="display: none;">
@@ -433,14 +484,14 @@
         <!-- WIP Valuation Page -->
         <div id="wip-page" class="page">
             <div class="container">
-                <h1>📦 WIP Valuation</h1>
-                <p class="subtitle">Calcolo della valutazione del Work in Process</p>
+                <h1>📦 <span data-i18n="wipTitle">WIP Valuation</span></h1>
+                <p class="subtitle" data-i18n="wipSubtitle">Calcolo della valutazione del Work in Process</p>
                 
                 <div class="section">
-                    <div class="section-title"><span class="step-number">1</span>Configurazione Base</div>
+                    <div class="section-title"><span class="step-number">1</span><span data-i18n="baseConfig">Configurazione Base</span></div>
                     <div class="wip-grid">
                         <div class="cost-input">
-                            <label>Metodo di Valutazione</label>
+                            <label data-i18n="valuationMethod">Metodo di Valutazione</label>
                             <select id="wipMethod">
                                 <option value="FIFO">FIFO (First In First Out)</option>
                                 <option value="LIFO">LIFO (Last In First Out)</option>
@@ -448,21 +499,21 @@
                             </select>
                         </div>
                         <div class="cost-input">
-                            <label>Nome Dipartimento</label>
+                            <label data-i18n="deptName">Nome Dipartimento</label>
                             <input type="text" id="wipDeptName" value="Sewing" placeholder="es. Sewing">
                         </div>
                     </div>
                 </div>
                 
                 <div class="section">
-                    <div class="section-title"><span class="step-number">2</span>Costi del Periodo</div>
+                    <div class="section-title"><span class="step-number">2</span><span data-i18n="periodCosts">Costi del Periodo</span></div>
                     <div class="wip-grid">
                         <div class="cost-input">
-                            <label>Materials (€)</label>
+                            <label><span data-i18n="materials">Materials</span> (€)</label>
                             <input type="number" id="wipMaterials" value="14400" step="0.01">
                         </div>
                         <div class="cost-input">
-                            <label>Indirect Conversion Costs (€)</label>
+                            <label><span data-i18n="conversionCosts">Indirect Conversion Costs</span> (€)</label>
                             <input type="number" id="wipConversion" value="23400" step="0.01">
                         </div>
                     </div>
@@ -520,6 +571,7 @@
         </div>
     </div>
     
+    <script src="/static/translations.js"></script>
     <script src="/static/app.js"></script>
 </body>
 </html>

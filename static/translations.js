@@ -1,0 +1,413 @@
+// ============================================================================
+// TRANSLATIONS
+// ============================================================================
+
+const translations = {
+    it: {
+        // Sidebar
+        appTitle: "Cost Accounting",
+        appSubtitle: "Strumenti Professionali",
+        reciprocalMethod: "Metodo Reciproco",
+        wipValuation: "Valutazione WIP",
+        
+        // Reciprocal Method
+        reciprocalTitle: "Metodo Reciproco",
+        reciprocalSubtitle: "Risoluzione di esercizi con Equazioni Simultanee",
+        step1Title: "Definisci i Dipartimenti",
+        step2Title: "Inserisci i Costi Primari",
+        step3Title: "Inserisci le Unità di Servizio Rese",
+        step4Title: "Basi di Allocazione (Opzionale)",
+        step4Subtitle: "Inserisci le basi (es. w.u, machine hours) per calcolare i cost rates",
+        supportDepts: "Dipartimenti di Supporto",
+        productionDepts: "Dipartimenti di Produzione",
+        addSupport: "+ Aggiungi Support",
+        addProduction: "+ Aggiungi Production",
+        confirmDepts: "Conferma Dipartimenti →",
+        confirmCosts: "Conferma Costi →",
+        confirmUnits: "Conferma Unità →",
+        calculateResults: "🧮 Calcola Risultati",
+        results: "Risultati",
+        directCost: "Costo diretto",
+        totalUnits: "Totale unità",
+        costRate: "Cost rate",
+        allocated: "Allocato",
+        allocationDetails: "Dettaglio Allocazioni",
+        total: "TOTALE",
+        totalGeneral: "TOTALE GENERALE",
+        
+        // WIP
+        wipTitle: "Valutazione WIP",
+        wipSubtitle: "Calcolo della valutazione del Work in Process",
+        baseConfig: "Configurazione Base",
+        valuationMethod: "Metodo di Valutazione",
+        deptName: "Nome Dipartimento",
+        periodCosts: "Costi del Periodo",
+        materials: "Materials",
+        conversionCosts: "Indirect Conversion Costs",
+        openingWIP: "Opening Work in Process",
+        unitsInWIP: "Unità in WIP Iniziale",
+        completionPercent: "Completion % (CC%)",
+        materialsCostWIP: "Costo Materials WIP",
+        conversionCostWIP: "Costo Conversion WIP",
+        periodMovements: "Movimenti del Periodo",
+        unitsStarted: "Unità Started",
+        unitsCompleted: "Unità Completed",
+        endingWIPCC: "Ending WIP CC%",
+        calculateWIP: "🧮 Calcola WIP Valuation",
+        wipResults: "Risultati WIP",
+        physicalFlow: "Physical Flow",
+        openingWIPLabel: "Opening WIP",
+        started: "Started",
+        completed: "Completed",
+        startedCompleted: "Started & Completed",
+        endingWIP: "Ending WIP",
+        equivalentUnits: "Equivalent Units",
+        costPerEU: "Cost per Equivalent Unit",
+        completingOpeningWIP: "Completing Opening WIP",
+        openingDM: "Opening DM",
+        openingCC: "Opening CC",
+        additionalCC: "Additional CC to complete",
+        totalOpeningWIP: "Total Opening WIP",
+        startedAndCompleted: "Started and Completed",
+        totalStartedCompleted: "Total Started & Completed",
+        endingWIPSection: "Ending WIP",
+        totalEndingWIP: "Total Ending WIP",
+        finishedGoods: "FINISHED GOODS",
+        units: "units",
+        unit: "unit"
+    },
+    
+    en: {
+        // Sidebar
+        appTitle: "Cost Accounting",
+        appSubtitle: "Professional Tools",
+        reciprocalMethod: "Reciprocal Method",
+        wipValuation: "WIP Valuation",
+        
+        // Reciprocal Method
+        reciprocalTitle: "Reciprocal Method",
+        reciprocalSubtitle: "Solving exercises with Simultaneous Equations",
+        step1Title: "Define Departments",
+        step2Title: "Enter Primary Costs",
+        step3Title: "Enter Service Units Rendered",
+        step4Title: "Allocation Bases (Optional)",
+        step4Subtitle: "Enter bases (e.g. w.u, machine hours) to calculate cost rates",
+        supportDepts: "Support Departments",
+        productionDepts: "Production Departments",
+        addSupport: "+ Add Support",
+        addProduction: "+ Add Production",
+        confirmDepts: "Confirm Departments →",
+        confirmCosts: "Confirm Costs →",
+        confirmUnits: "Confirm Units →",
+        calculateResults: "🧮 Calculate Results",
+        results: "Results",
+        directCost: "Direct cost",
+        totalUnits: "Total units",
+        costRate: "Cost rate",
+        allocated: "Allocated",
+        allocationDetails: "Allocation Details",
+        total: "TOTAL",
+        totalGeneral: "TOTAL GENERAL",
+        
+        // WIP
+        wipTitle: "WIP Valuation",
+        wipSubtitle: "Work in Process valuation calculation",
+        baseConfig: "Base Configuration",
+        valuationMethod: "Valuation Method",
+        deptName: "Department Name",
+        periodCosts: "Period Costs",
+        materials: "Materials",
+        conversionCosts: "Indirect Conversion Costs",
+        openingWIP: "Opening Work in Process",
+        unitsInWIP: "Units in Opening WIP",
+        completionPercent: "Completion % (CC%)",
+        materialsCostWIP: "Materials Cost WIP",
+        conversionCostWIP: "Conversion Cost WIP",
+        periodMovements: "Period Movements",
+        unitsStarted: "Units Started",
+        unitsCompleted: "Units Completed",
+        endingWIPCC: "Ending WIP CC%",
+        calculateWIP: "🧮 Calculate WIP Valuation",
+        wipResults: "WIP Results",
+        physicalFlow: "Physical Flow",
+        openingWIPLabel: "Opening WIP",
+        started: "Started",
+        completed: "Completed",
+        startedCompleted: "Started & Completed",
+        endingWIP: "Ending WIP",
+        equivalentUnits: "Equivalent Units",
+        costPerEU: "Cost per Equivalent Unit",
+        completingOpeningWIP: "Completing Opening WIP",
+        openingDM: "Opening DM",
+        openingCC: "Opening CC",
+        additionalCC: "Additional CC to complete",
+        totalOpeningWIP: "Total Opening WIP",
+        startedAndCompleted: "Started and Completed",
+        totalStartedCompleted: "Total Started & Completed",
+        endingWIPSection: "Ending WIP",
+        totalEndingWIP: "Total Ending WIP",
+        finishedGoods: "FINISHED GOODS",
+        units: "units",
+        unit: "unit"
+    },
+    
+    fr: {
+        // Sidebar
+        appTitle: "Comptabilité Analytique",
+        appSubtitle: "Outils Professionnels",
+        reciprocalMethod: "Méthode Réciproque",
+        wipValuation: "Évaluation WIP",
+        
+        // Reciprocal Method
+        reciprocalTitle: "Méthode Réciproque",
+        reciprocalSubtitle: "Résolution d'exercices avec Équations Simultanées",
+        step1Title: "Définir les Départements",
+        step2Title: "Entrer les Coûts Primaires",
+        step3Title: "Entrer les Unités de Service Rendues",
+        step4Title: "Bases d'Allocation (Optionnel)",
+        step4Subtitle: "Entrez les bases (ex. u.o, heures machine) pour calculer les taux de coût",
+        supportDepts: "Départements de Support",
+        productionDepts: "Départements de Production",
+        addSupport: "+ Ajouter Support",
+        addProduction: "+ Ajouter Production",
+        confirmDepts: "Confirmer Départements →",
+        confirmCosts: "Confirmer Coûts →",
+        confirmUnits: "Confirmer Unités →",
+        calculateResults: "🧮 Calculer Résultats",
+        results: "Résultats",
+        directCost: "Coût direct",
+        totalUnits: "Total unités",
+        costRate: "Taux de coût",
+        allocated: "Alloué",
+        allocationDetails: "Détails d'Allocation",
+        total: "TOTAL",
+        totalGeneral: "TOTAL GÉNÉRAL",
+        
+        // WIP
+        wipTitle: "Évaluation WIP",
+        wipSubtitle: "Calcul de l'évaluation du Work in Process",
+        baseConfig: "Configuration de Base",
+        valuationMethod: "Méthode d'Évaluation",
+        deptName: "Nom du Département",
+        periodCosts: "Coûts de la Période",
+        materials: "Matériaux",
+        conversionCosts: "Coûts de Conversion Indirects",
+        openingWIP: "WIP d'Ouverture",
+        unitsInWIP: "Unités en WIP Initial",
+        completionPercent: "% d'Achèvement (CC%)",
+        materialsCostWIP: "Coût Matériaux WIP",
+        conversionCostWIP: "Coût Conversion WIP",
+        periodMovements: "Mouvements de la Période",
+        unitsStarted: "Unités Démarrées",
+        unitsCompleted: "Unités Terminées",
+        endingWIPCC: "CC% WIP Final",
+        calculateWIP: "🧮 Calculer Évaluation WIP",
+        wipResults: "Résultats WIP",
+        physicalFlow: "Flux Physique",
+        openingWIPLabel: "WIP d'Ouverture",
+        started: "Démarrées",
+        completed: "Terminées",
+        startedCompleted: "Démarrées & Terminées",
+        endingWIP: "WIP Final",
+        equivalentUnits: "Unités Équivalentes",
+        costPerEU: "Coût par Unité Équivalente",
+        completingOpeningWIP: "Achèvement WIP d'Ouverture",
+        openingDM: "DM d'Ouverture",
+        openingCC: "CC d'Ouverture",
+        additionalCC: "CC Additionnel pour terminer",
+        totalOpeningWIP: "Total WIP d'Ouverture",
+        startedAndCompleted: "Démarrées et Terminées",
+        totalStartedCompleted: "Total Démarrées & Terminées",
+        endingWIPSection: "WIP Final",
+        totalEndingWIP: "Total WIP Final",
+        finishedGoods: "PRODUITS FINIS",
+        units: "unités",
+        unit: "unité"
+    },
+    
+    es: {
+        // Sidebar
+        appTitle: "Contabilidad de Costos",
+        appSubtitle: "Herramientas Profesionales",
+        reciprocalMethod: "Método Recíproco",
+        wipValuation: "Valoración WIP",
+        
+        // Reciprocal Method
+        reciprocalTitle: "Método Recíproco",
+        reciprocalSubtitle: "Resolución de ejercicios con Ecuaciones Simultáneas",
+        step1Title: "Definir Departamentos",
+        step2Title: "Introducir Costos Primarios",
+        step3Title: "Introducir Unidades de Servicio Prestadas",
+        step4Title: "Bases de Asignación (Opcional)",
+        step4Subtitle: "Introduce las bases (ej. u.o, horas máquina) para calcular las tasas de costo",
+        supportDepts: "Departamentos de Soporte",
+        productionDepts: "Departamentos de Producción",
+        addSupport: "+ Añadir Soporte",
+        addProduction: "+ Añadir Producción",
+        confirmDepts: "Confirmar Departamentos →",
+        confirmCosts: "Confirmar Costos →",
+        confirmUnits: "Confirmar Unidades →",
+        calculateResults: "🧮 Calcular Resultados",
+        results: "Resultados",
+        directCost: "Costo directo",
+        totalUnits: "Total unidades",
+        costRate: "Tasa de costo",
+        allocated: "Asignado",
+        allocationDetails: "Detalles de Asignación",
+        total: "TOTAL",
+        totalGeneral: "TOTAL GENERAL",
+        
+        // WIP
+        wipTitle: "Valoración WIP",
+        wipSubtitle: "Cálculo de la valoración del Work in Process",
+        baseConfig: "Configuración Base",
+        valuationMethod: "Método de Valoración",
+        deptName: "Nombre del Departamento",
+        periodCosts: "Costos del Período",
+        materials: "Materiales",
+        conversionCosts: "Costos de Conversión Indirectos",
+        openingWIP: "WIP de Apertura",
+        unitsInWIP: "Unidades en WIP Inicial",
+        completionPercent: "% de Finalización (CC%)",
+        materialsCostWIP: "Costo Materiales WIP",
+        conversionCostWIP: "Costo Conversión WIP",
+        periodMovements: "Movimientos del Período",
+        unitsStarted: "Unidades Iniciadas",
+        unitsCompleted: "Unidades Completadas",
+        endingWIPCC: "CC% WIP Final",
+        calculateWIP: "🧮 Calcular Valoración WIP",
+        wipResults: "Resultados WIP",
+        physicalFlow: "Flujo Físico",
+        openingWIPLabel: "WIP de Apertura",
+        started: "Iniciadas",
+        completed: "Completadas",
+        startedCompleted: "Iniciadas & Completadas",
+        endingWIP: "WIP Final",
+        equivalentUnits: "Unidades Equivalentes",
+        costPerEU: "Costo por Unidad Equivalente",
+        completingOpeningWIP: "Completando WIP de Apertura",
+        openingDM: "DM de Apertura",
+        openingCC: "CC de Apertura",
+        additionalCC: "CC Adicional para completar",
+        totalOpeningWIP: "Total WIP de Apertura",
+        startedAndCompleted: "Iniciadas y Completadas",
+        totalStartedCompleted: "Total Iniciadas & Completadas",
+        endingWIPSection: "WIP Final",
+        totalEndingWIP: "Total WIP Final",
+        finishedGoods: "PRODUCTOS TERMINADOS",
+        units: "unidades",
+        unit: "unidad"
+    },
+    
+    ca: {
+        // Sidebar
+        appTitle: "Comptabilitat de Costos",
+        appSubtitle: "Eines Professionals",
+        reciprocalMethod: "Mètode Recíproc",
+        wipValuation: "Valoració WIP",
+        
+        // Reciprocal Method
+        reciprocalTitle: "Mètode Recíproc",
+        reciprocalSubtitle: "Resolució d'exercicis amb Equacions Simultànies",
+        step1Title: "Definir Departaments",
+        step2Title: "Introduir Costos Primaris",
+        step3Title: "Introduir Unitats de Servei Prestades",
+        step4Title: "Bases d'Assignació (Opcional)",
+        step4Subtitle: "Introdueix les bases (ex. u.o, hores màquina) per calcular les taxes de cost",
+        supportDepts: "Departaments de Suport",
+        productionDepts: "Departaments de Producció",
+        addSupport: "+ Afegir Suport",
+        addProduction: "+ Afegir Producció",
+        confirmDepts: "Confirmar Departaments →",
+        confirmCosts: "Confirmar Costos →",
+        confirmUnits: "Confirmar Unitats →",
+        calculateResults: "🧮 Calcular Resultats",
+        results: "Resultats",
+        directCost: "Cost directe",
+        totalUnits: "Total unitats",
+        costRate: "Taxa de cost",
+        allocated: "Assignat",
+        allocationDetails: "Detalls d'Assignació",
+        total: "TOTAL",
+        totalGeneral: "TOTAL GENERAL",
+        
+        // WIP
+        wipTitle: "Valoració WIP",
+        wipSubtitle: "Càlcul de la valoració del Work in Process",
+        baseConfig: "Configuració Base",
+        valuationMethod: "Mètode de Valoració",
+        deptName: "Nom del Departament",
+        periodCosts: "Costos del Període",
+        materials: "Materials",
+        conversionCosts: "Costos de Conversió Indirectes",
+        openingWIP: "WIP d'Obertura",
+        unitsInWIP: "Unitats en WIP Inicial",
+        completionPercent: "% de Finalització (CC%)",
+        materialsCostWIP: "Cost Materials WIP",
+        conversionCostWIP: "Cost Conversió WIP",
+        periodMovements: "Moviments del Període",
+        unitsStarted: "Unitats Iniciades",
+        unitsCompleted: "Unitats Completades",
+        endingWIPCC: "CC% WIP Final",
+        calculateWIP: "🧮 Calcular Valoració WIP",
+        wipResults: "Resultats WIP",
+        physicalFlow: "Flux Físic",
+        openingWIPLabel: "WIP d'Obertura",
+        started: "Iniciades",
+        completed: "Completades",
+        startedCompleted: "Iniciades & Completades",
+        endingWIP: "WIP Final",
+        equivalentUnits: "Unitats Equivalents",
+        costPerEU: "Cost per Unitat Equivalent",
+        completingOpeningWIP: "Completant WIP d'Obertura",
+        openingDM: "DM d'Obertura",
+        openingCC: "CC d'Obertura",
+        additionalCC: "CC Addicional per completar",
+        totalOpeningWIP: "Total WIP d'Obertura",
+        startedAndCompleted: "Iniciades i Completades",
+        totalStartedCompleted: "Total Iniciades & Completades",
+        endingWIPSection: "WIP Final",
+        totalEndingWIP: "Total WIP Final",
+        finishedGoods: "PRODUCTES ACABATS",
+        units: "unitats",
+        unit: "unitat"
+    }
+};
+
+let currentLang = 'it';
+
+function setLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem('preferredLanguage', lang);
+    updateAllTexts();
+    
+    // Update active language button
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelector(`[data-lang="${lang}"]`).classList.add('active');
+}
+
+function t(key) {
+    return translations[currentLang][key] || key;
+}
+
+function updateAllTexts() {
+    // Update all elements with data-i18n attribute
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        el.textContent = t(key);
+    });
+    
+    // Update placeholders
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        el.placeholder = t(key);
+    });
+}
+
+// Initialize language on load
+document.addEventListener('DOMContentLoaded', () => {
+    const savedLang = localStorage.getItem('preferredLanguage') || 'it';
+    setLanguage(savedLang);
+});
