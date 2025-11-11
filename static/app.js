@@ -351,6 +351,10 @@ function displayWIPResults(data) {
                     <span>${data.physical_flow.completed} units</span>
                 </div>
                 <div class="result-item">
+                    <span>Started & Completed</span>
+                    <span>${data.physical_flow.started_and_completed} units</span>
+                </div>
+                <div class="result-item">
                     <span>Ending WIP</span>
                     <span>${data.physical_flow.ending_wip} units</span>
                 </div>
@@ -384,21 +388,60 @@ function displayWIPResults(data) {
                 </div>
             </div>
         </div>
-        
-        <div class="detail-section">
-            <h4>🎯 Valutazione Finale</h4>
-            <div class="allocation-detail"><strong>Finished Goods (Completed Units):</strong></div>
-            <div class="allocation-detail">€${data.valuation.finished_goods.toFixed(2)}</div>
-            <div class="allocation-detail" style="margin-top: 15px;"><strong>Ending WIP:</strong></div>
-            <div class="allocation-detail">Materials: €${data.valuation.ending_wip_materials.toFixed(2)}</div>
-            <div class="allocation-detail">Conversion: €${data.valuation.ending_wip_conversion.toFixed(2)}</div>
-            <div class="allocation-detail" style="font-weight: 600; color: #667eea; margin-top: 10px;">
-                Total Ending WIP: €${data.valuation.ending_wip_total.toFixed(2)}
+    `;
+    
+    // FIFO Breakdown in 3 sections
+    if (data.method === 'FIFO' && data.fifo_breakdown) {
+        html += `
+            <div class="detail-section" style="background: #e8f5e9; border-left-color: #4caf50;">
+                <h4>1️⃣ Completing Opening WIP (${data.physical_flow.opening_wip} units)</h4>
+                <div class="allocation-detail">Opening DM: €${data.fifo_breakdown.completing_opening.opening_dm.toFixed(2)}</div>
+                <div class="allocation-detail">Opening CC: €${data.fifo_breakdown.completing_opening.opening_cc.toFixed(2)}</div>
+                <div class="allocation-detail">Additional CC to complete: €${data.fifo_breakdown.completing_opening.additional_cc.toFixed(2)}</div>
+                <div class="allocation-detail" style="font-weight: 600; color: #4caf50; margin-top: 10px; font-size: 1.1em;">
+                    Total Opening WIP: €${data.fifo_breakdown.completing_opening.total.toFixed(2)}
+                </div>
             </div>
-        </div>
-        
+            
+            <div class="detail-section" style="background: #e3f2fd; border-left-color: #2196f3;">
+                <h4>2️⃣ Started and Completed (${data.fifo_breakdown.started_and_completed.units} units)</h4>
+                <div class="allocation-detail">
+                    ${data.fifo_breakdown.started_and_completed.units} units × €${data.cost_per_eu.total.toFixed(4)}/unit
+                </div>
+                <div class="allocation-detail" style="font-weight: 600; color: #2196f3; margin-top: 10px; font-size: 1.1em;">
+                    Total Started & Completed: €${data.fifo_breakdown.started_and_completed.cost.toFixed(2)}
+                </div>
+            </div>
+            
+            <div class="detail-section" style="background: #fff3e0; border-left-color: #ff9800;">
+                <h4>3️⃣ Ending WIP (${data.fifo_breakdown.ending_wip.units} units)</h4>
+                <div class="allocation-detail">DM (100%): ${data.fifo_breakdown.ending_wip.units} × €${data.cost_per_eu.materials.toFixed(4)} = €${data.fifo_breakdown.ending_wip.dm.toFixed(2)}</div>
+                <div class="allocation-detail">CC (${(data.physical_flow.ending_wip > 0 ? (data.valuation.ending_wip_conversion / data.cost_per_eu.conversion / data.physical_flow.ending_wip * 100) : 0).toFixed(0)}%): ${data.fifo_breakdown.ending_wip.units} × ${(data.physical_flow.ending_wip > 0 ? (data.valuation.ending_wip_conversion / data.cost_per_eu.conversion / data.physical_flow.ending_wip) : 0).toFixed(2)} × €${data.cost_per_eu.conversion.toFixed(4)} = €${data.fifo_breakdown.ending_wip.cc.toFixed(2)}</div>
+                <div class="allocation-detail" style="font-weight: 600; color: #ff9800; margin-top: 10px; font-size: 1.1em;">
+                    Total Ending WIP: €${data.fifo_breakdown.ending_wip.total.toFixed(2)}
+                </div>
+            </div>
+        `;
+    } else {
+        // Non-FIFO methods
+        html += `
+            <div class="detail-section">
+                <h4>🎯 Valutazione Finale</h4>
+                <div class="allocation-detail"><strong>Finished Goods (Completed Units):</strong></div>
+                <div class="allocation-detail">€${data.valuation.finished_goods.toFixed(2)}</div>
+                <div class="allocation-detail" style="margin-top: 15px;"><strong>Ending WIP:</strong></div>
+                <div class="allocation-detail">Materials: €${data.valuation.ending_wip_materials.toFixed(2)}</div>
+                <div class="allocation-detail">Conversion: €${data.valuation.ending_wip_conversion.toFixed(2)}</div>
+                <div class="allocation-detail" style="font-weight: 600; color: #667eea; margin-top: 10px;">
+                    Total Ending WIP: €${data.valuation.ending_wip_total.toFixed(2)}
+                </div>
+            </div>
+        `;
+    }
+    
+    html += `
         <div class="total-banner">
-            TOTAL COSTS ACCOUNTED FOR: €${data.total_costs.toFixed(2)}
+            FINISHED GOODS: €${data.valuation.finished_goods.toFixed(2)} | ENDING WIP: €${data.valuation.ending_wip_total.toFixed(2)} | TOTAL: €${data.total_costs.toFixed(2)}
         </div>
     `;
     

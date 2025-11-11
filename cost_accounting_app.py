@@ -146,20 +146,38 @@ def calculate_wip():
         # Calculate ending WIP units
         ending_wip = opening_units + started - completed
         
+        # Started and completed units (units that started AND completed in this period)
+        started_and_completed = completed - opening_units
+        
         # Calculate equivalent units based on method
         if method == 'FIFO':
-            # FIFO: separate opening WIP work from current period work
-            eu_materials = completed - opening_units + (ending_wip * 1.0)
-            eu_conversion = (opening_units * (1 - opening_cc)) + (completed - opening_units) + (ending_wip * ending_cc)
+            # FIFO Equivalent Units
+            # Materials: Started and completed + Ending WIP (100% materials)
+            eu_materials = started_and_completed + ending_wip
+            
+            # Conversion: Complete opening WIP + Started and completed + Ending WIP (at CC%)
+            eu_conversion = (opening_units * (1 - opening_cc)) + started_and_completed + (ending_wip * ending_cc)
             
             # Cost per EU (only current period costs)
             cost_per_eu_materials = materials / eu_materials
             cost_per_eu_conversion = conversion / eu_conversion
             
-            # Valuation
-            finished_goods = opening_materials + opening_conversion + \
-                           (opening_units * (1 - opening_cc) * cost_per_eu_conversion) + \
-                           ((completed - opening_units) * (cost_per_eu_materials + cost_per_eu_conversion))
+            # FIFO Valuation - 3 parts
+            # 1. Completing Opening WIP
+            completing_opening_dm = 0  # Materials already added in opening
+            completing_opening_cc = opening_units * (1 - opening_cc) * cost_per_eu_conversion
+            completing_opening_total = opening_materials + opening_conversion + completing_opening_cc
+            
+            # 2. Started and Completed
+            started_completed_cost = started_and_completed * (cost_per_eu_materials + cost_per_eu_conversion)
+            
+            # 3. Ending WIP
+            ending_wip_materials = ending_wip * cost_per_eu_materials
+            ending_wip_conversion = ending_wip * ending_cc * cost_per_eu_conversion
+            ending_wip_total = ending_wip_materials + ending_wip_conversion
+            
+            # Total finished goods
+            finished_goods = completing_opening_total + started_completed_cost
             
         elif method == 'AVG':
             # Average: combine opening WIP with current period
@@ -174,31 +192,41 @@ def calculate_wip():
             
             finished_goods = completed * (cost_per_eu_materials + cost_per_eu_conversion)
             
-        else:  # LIFO
-            # LIFO: assume most recent costs go to completed units
-            eu_materials = completed + ending_wip
-            eu_conversion = completed + (ending_wip * ending_cc)
+            ending_wip_materials = ending_wip * cost_per_eu_materials
+            ending_wip_conversion = ending_wip * ending_cc * cost_per_eu_conversion
+            ending_wip_total = ending_wip_materials + ending_wip_conversion
             
-            cost_per_eu_materials = materials / started
-            cost_per_eu_conversion = conversion / (started + (opening_units * opening_cc))
+            # For AVG, no separate sections
+            completing_opening_total = 0
+            started_completed_cost = 0
+            
+        else:  # LIFO
+            eu_materials = started + ending_wip
+            eu_conversion = started + (ending_wip * ending_cc)
+            
+            cost_per_eu_materials = materials / eu_materials
+            cost_per_eu_conversion = conversion / eu_conversion
             
             finished_goods = completed * (cost_per_eu_materials + cost_per_eu_conversion)
-        
-        # Ending WIP valuation
-        ending_wip_materials = ending_wip * cost_per_eu_materials
-        ending_wip_conversion = ending_wip * ending_cc * cost_per_eu_conversion
-        ending_wip_total = ending_wip_materials + ending_wip_conversion
+            
+            ending_wip_materials = ending_wip * cost_per_eu_materials
+            ending_wip_conversion = ending_wip * ending_cc * cost_per_eu_conversion
+            ending_wip_total = ending_wip_materials + ending_wip_conversion
+            
+            completing_opening_total = 0
+            started_completed_cost = 0
         
         # Total costs
         total_costs = opening_materials + opening_conversion + materials + conversion
         
-        return jsonify({
+        result = {
             'success': True,
             'method': method,
             'physical_flow': {
                 'opening_wip': opening_units,
                 'started': started,
                 'completed': completed,
+                'started_and_completed': started_and_completed,
                 'ending_wip': ending_wip
             },
             'equivalent_units': {
@@ -217,7 +245,30 @@ def calculate_wip():
                 'ending_wip_total': float(ending_wip_total)
             },
             'total_costs': float(total_costs)
-        })
+        }
+        
+        # Add FIFO-specific breakdown
+        if method == 'FIFO':
+            result['fifo_breakdown'] = {
+                'completing_opening': {
+                    'opening_dm': float(opening_materials),
+                    'opening_cc': float(opening_conversion),
+                    'additional_cc': float(completing_opening_cc),
+                    'total': float(completing_opening_total)
+                },
+                'started_and_completed': {
+                    'units': started_and_completed,
+                    'cost': float(started_completed_cost)
+                },
+                'ending_wip': {
+                    'units': ending_wip,
+                    'dm': float(ending_wip_materials),
+                    'cc': float(ending_wip_conversion),
+                    'total': float(ending_wip_total)
+                }
+            }
+        
+        return jsonify(result)
         
     except Exception as e:
         return jsonify({
