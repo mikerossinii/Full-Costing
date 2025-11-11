@@ -37,6 +37,8 @@ function showPage(pageName) {
 
 let supportDepts = [];
 let productionDepts = [];
+let lastReciprocalResults = null;
+let lastWIPResults = null;
 
 function init() {
     supportDepts = ['Maintenance', 'Administration', 'Marketing'];
@@ -216,6 +218,9 @@ function calculateReciprocal() {
 }
 
 function displayReciprocalResults(data, support_depts, production_depts, allocation_bases) {
+    // Save results for language switching
+    lastReciprocalResults = { data, support_depts, production_depts, allocation_bases };
+    
     let supportHTML = '';
     Object.entries(data.support_costs).forEach(([dept, cost]) => {
         const direct = support_depts[dept];
@@ -347,6 +352,9 @@ function calculateWIP() {
 }
 
 function displayWIPResults(data) {
+    // Save results for language switching
+    lastWIPResults = data;
+    
     let html = `
         <div class="results-grid">
             <div class="result-card">
@@ -465,3 +473,21 @@ function displayWIPResults(data) {
 
 // Initialize
 init();
+
+// Listen for language changes
+window.addEventListener('languageChanged', () => {
+    // Regenerate reciprocal results if they exist
+    if (lastReciprocalResults) {
+        displayReciprocalResults(
+            lastReciprocalResults.data,
+            lastReciprocalResults.support_depts,
+            lastReciprocalResults.production_depts,
+            lastReciprocalResults.allocation_bases
+        );
+    }
+    
+    // Regenerate WIP results if they exist
+    if (lastWIPResults) {
+        displayWIPResults(lastWIPResults);
+    }
+});

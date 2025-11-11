@@ -386,6 +386,9 @@ function setLanguage(lang) {
         btn.classList.remove('active');
     });
     document.querySelector(`[data-lang="${lang}"]`).classList.add('active');
+    
+    // Trigger custom event for dynamic content updates
+    window.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang } }));
 }
 
 function t(key) {
