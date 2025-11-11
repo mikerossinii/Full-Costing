@@ -2,6 +2,14 @@
 // NAVIGATION
 // ============================================================================
 
+function toggleMobileMenu() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.querySelector('.mobile-overlay');
+    
+    sidebar.classList.toggle('active');
+    overlay.classList.toggle('active');
+}
+
 function showPage(pageName) {
     // Hide all pages
     document.querySelectorAll('.page').forEach(page => {
@@ -16,6 +24,11 @@ function showPage(pageName) {
         item.classList.remove('active');
     });
     event.currentTarget.classList.add('active');
+    
+    // Close mobile menu if open
+    if (window.innerWidth <= 768) {
+        toggleMobileMenu();
+    }
 }
 
 // ============================================================================
