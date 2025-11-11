@@ -471,6 +471,138 @@ function displayWIPResults(data) {
     document.getElementById('wipResults').scrollIntoView({ behavior: 'smooth' });
 }
 
+// ============================================================================
+// BREAK-EVEN ANALYSIS
+// ============================================================================
+
+let lastBreakEvenResults = null;
+
+function calculateBreakEven() {
+    const productName = document.getElementById('beProductName').value;
+    const sellingPrice = parseFloat(document.getElementById('beSellingPrice').value);
+    const variableCost = parseFloat(document.getElementById('beVariableCost').value);
+    const fixedCosts = parseFloat(document.getElementById('beFixedCosts').value);
+    const targetProfit = parseFloat(document.getElementById('beTargetProfit').value) || 0;
+    const expectedSales = parseFloat(document.getElementById('beExpectedSales').value) || 0;
+    
+    // Calculate contribution margin
+    const contributionMargin = sellingPrice - variableCost;
+    const contributionMarginRatio = (contributionMargin / sellingPrice) * 100;
+    
+    // Calculate break-even point
+    const breakEvenUnits = fixedCosts / contributionMargin;
+    const breakEvenRevenue = breakEvenUnits * sellingPrice;
+    
+    // Calculate units needed for target profit
+    const unitsForTarget = (fixedCosts + targetProfit) / contributionMargin;
+    
+    // Calculate margin of safety
+    let marginOfSafety = 0;
+    let marginOfSafetyPercent = 0;
+    let operatingLeverage = 0;
+    
+    if (expectedSales > 0) {
+        marginOfSafety = expectedSales - breakEvenUnits;
+        marginOfSafetyPercent = (marginOfSafety / expectedSales) * 100;
+        
+        // Operating leverage = Contribution Margin / Operating Income
+        const totalContribution = contributionMargin * expectedSales;
+        const operatingIncome = totalContribution - fixedCosts;
+        if (operatingIncome > 0) {
+            operatingLeverage = totalContribution / operatingIncome;
+        }
+    }
+    
+    const results = {
+        productName,
+        sellingPrice,
+        variableCost,
+        fixedCosts,
+        targetProfit,
+        expectedSales,
+        contributionMargin,
+        contributionMarginRatio,
+        breakEvenUnits,
+        breakEvenRevenue,
+        unitsForTarget,
+        marginOfSafety,
+        marginOfSafetyPercent,
+        operatingLeverage
+    };
+    
+    displayBreakEvenResults(results);
+}
+
+function displayBreakEvenResults(data) {
+    lastBreakEvenResults = data;
+    
+    let html = `
+        <div class="results-grid">
+            <div class="result-card">
+                <h3>💰 ${t('contributionMargin')}</h3>
+                <div class="result-item">
+                    <span>${t('contributionMargin')}</span>
+                    <span>€${data.contributionMargin.toFixed(2)}/${t('unit')}</span>
+                </div>
+                <div class="result-item">
+                    <span>${t('contributionMarginRatio')}</span>
+                    <span>${data.contributionMarginRatio.toFixed(2)}%</span>
+                </div>
+            </div>
+            
+            <div class="result-card">
+                <h3>🎯 Break-Even Point</h3>
+                <div class="result-item">
+                    <span>${t('breakEvenUnits')}</span>
+                    <span>${Math.ceil(data.breakEvenUnits)} ${t('units')}</span>
+                </div>
+                <div class="result-item">
+                    <span>${t('breakEvenRevenue')}</span>
+                    <span>€${data.breakEvenRevenue.toFixed(2)}</span>
+                </div>
+            </div>
+            
+            <div class="result-card">
+                <h3>📈 ${t('targetAnalysis')}</h3>
+                <div class="result-item">
+                    <span>${t('unitsForTarget')}</span>
+                    <span>${Math.ceil(data.unitsForTarget)} ${t('units')}</span>
+                </div>
+                <div class="result-item">
+                    <span>${t('targetProfit')}</span>
+                    <span>€${data.targetProfit.toFixed(2)}</span>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    if (data.expectedSales > 0) {
+        html += `
+            <div class="detail-section">
+                <h4>🛡️ ${t('marginOfSafety')}</h4>
+                <div class="allocation-detail">${t('expectedSales')}: ${data.expectedSales} ${t('units')}</div>
+                <div class="allocation-detail">Break-Even: ${Math.ceil(data.breakEvenUnits)} ${t('units')}</div>
+                <div class="allocation-detail" style="font-weight: 600; color: #667eea; margin-top: 10px;">
+                    ${t('marginOfSafety')}: ${data.marginOfSafety.toFixed(0)} ${t('units')} (${data.marginOfSafetyPercent.toFixed(2)}%)
+                </div>
+                <div class="allocation-detail" style="font-weight: 600; color: #667eea; margin-top: 10px;">
+                    ${t('operatingLeverage')}: ${data.operatingLeverage.toFixed(2)}
+                </div>
+            </div>
+        `;
+    }
+    
+    html += `
+        <div class="total-banner">
+            ${data.productName.toUpperCase()} | Break-Even: ${Math.ceil(data.breakEvenUnits)} ${t('units')} | €${data.breakEvenRevenue.toFixed(2)}
+        </div>
+    `;
+    
+    document.getElementById('breakEvenResultsContent').innerHTML = html;
+    document.getElementById('breakEvenResults').style.display = 'block';
+    document.getElementById('breakEvenResults').scrollIntoView({ behavior: 'smooth' });
+}
+
 // Initialize
 init();
 
@@ -489,5 +621,10 @@ window.addEventListener('languageChanged', () => {
     // Regenerate WIP results if they exist
     if (lastWIPResults) {
         displayWIPResults(lastWIPResults);
+    }
+    
+    // Regenerate Break-Even results if they exist
+    if (lastBreakEvenResults) {
+        displayBreakEvenResults(lastBreakEvenResults);
     }
 });

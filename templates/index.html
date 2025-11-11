@@ -587,6 +587,11 @@
             <span data-i18n="wipValuation">WIP Valuation</span>
         </div>
         
+        <div class="menu-item" onclick="showPage('breakeven')">
+            <span class="menu-icon">📊</span>
+            <span data-i18n="breakEvenAnalysis">Break-Even Analysis</span>
+        </div>
+        
         <div class="lang-selector">
             <p>🌐 Language / Lingua</p>
             <div class="lang-buttons">
@@ -746,6 +751,79 @@
                 <div class="results" id="wipResults">
                     <div class="section-title">📊 <span data-i18n="wipResults">Risultati WIP</span></div>
                     <div id="wipResultsContent"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Break-Even Analysis Page -->
+        <div id="breakeven-page" class="page">
+            <div class="container">
+                <h1><span style="font-size: 1.2em;">📊</span> <span data-i18n="breakEvenTitle">Break-Even Analysis</span></h1>
+                <p class="subtitle" data-i18n="breakEvenSubtitle">Analisi del punto di pareggio e margine di contribuzione</p>
+                
+                <div class="section">
+                    <div class="section-title"><span class="step-number">1</span><span data-i18n="productInfo">Informazioni Prodotto</span></div>
+                    <div class="wip-grid">
+                        <div class="cost-input">
+                            <label data-i18n="productName">Nome Prodotto</label>
+                            <input type="text" id="beProductName" value="Product A" placeholder="es. Product A">
+                        </div>
+                        <div class="cost-input">
+                            <label data-i18n="sellingPrice">Prezzo di Vendita (€)</label>
+                            <input type="number" id="beSellingPrice" value="100" step="0.01">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title"><span class="step-number">2</span><span data-i18n="variableCosts">Costi Variabili</span></div>
+                    <div class="wip-grid">
+                        <div class="cost-input">
+                            <label data-i18n="variableCostPerUnit">Costo Variabile per Unità (€)</label>
+                            <input type="number" id="beVariableCost" value="60" step="0.01">
+                        </div>
+                        <div class="cost-input">
+                            <label data-i18n="variableCostBreakdown">Dettaglio (opzionale)</label>
+                            <input type="text" id="beVariableBreakdown" placeholder="es. Materials: 40, Labor: 20">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title"><span class="step-number">3</span><span data-i18n="fixedCosts">Costi Fissi</span></div>
+                    <div class="wip-grid">
+                        <div class="cost-input">
+                            <label data-i18n="totalFixedCosts">Costi Fissi Totali (€)</label>
+                            <input type="number" id="beFixedCosts" value="50000" step="0.01">
+                        </div>
+                        <div class="cost-input">
+                            <label data-i18n="fixedCostBreakdown">Dettaglio (opzionale)</label>
+                            <input type="text" id="beFixedBreakdown" placeholder="es. Rent: 20000, Salaries: 30000">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title"><span class="step-number">4</span><span data-i18n="targetAnalysis">Analisi Target (Opzionale)</span></div>
+                    <div class="wip-grid">
+                        <div class="cost-input">
+                            <label data-i18n="targetProfit">Profitto Target (€)</label>
+                            <input type="number" id="beTargetProfit" value="20000" step="0.01">
+                        </div>
+                        <div class="cost-input">
+                            <label data-i18n="expectedSales">Vendite Previste (unità)</label>
+                            <input type="number" id="beExpectedSales" value="2000" step="1">
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="calculate-btn" onclick="calculateBreakEven()" data-i18n="calculateBreakEven">🧮 Calcola Break-Even</button>
+                </div>
+                
+                <div class="results" id="breakEvenResults">
+                    <div class="section-title">📊 <span data-i18n="results">Risultati</span></div>
+                    <div id="breakEvenResultsContent"></div>
                 </div>
             </div>
         </div>

@@ -74,7 +74,33 @@ const translations = {
         totalEndingWIP: "Total Ending WIP",
         finishedGoods: "FINISHED GOODS",
         units: "units",
-        unit: "unit"
+        unit: "unit",
+        
+        // Break-Even
+        breakEvenAnalysis: "Break-Even Analysis",
+        breakEvenTitle: "Break-Even Analysis",
+        breakEvenSubtitle: "Analisi del punto di pareggio e margine di contribuzione",
+        productInfo: "Informazioni Prodotto",
+        productName: "Nome Prodotto",
+        sellingPrice: "Prezzo di Vendita",
+        variableCosts: "Costi Variabili",
+        variableCostPerUnit: "Costo Variabile per Unità",
+        variableCostBreakdown: "Dettaglio (opzionale)",
+        fixedCosts: "Costi Fissi",
+        totalFixedCosts: "Costi Fissi Totali",
+        fixedCostBreakdown: "Dettaglio (opzionale)",
+        targetAnalysis: "Analisi Target (Opzionale)",
+        targetProfit: "Profitto Target",
+        expectedSales: "Vendite Previste",
+        calculateBreakEven: "🧮 Calcola Break-Even",
+        contributionMargin: "Margine di Contribuzione",
+        contributionMarginRatio: "Rapporto Margine di Contribuzione",
+        breakEvenUnits: "Break-Even Point (Unità)",
+        breakEvenRevenue: "Break-Even Point (Fatturato)",
+        unitsForTarget: "Unità per Profitto Target",
+        marginOfSafety: "Margine di Sicurezza",
+        marginOfSafetyPercent: "Margine di Sicurezza %",
+        operatingLeverage: "Leva Operativa"
     },
     
     en: {
@@ -148,7 +174,33 @@ const translations = {
         totalEndingWIP: "Total Ending WIP",
         finishedGoods: "FINISHED GOODS",
         units: "units",
-        unit: "unit"
+        unit: "unit",
+        
+        // Break-Even
+        breakEvenAnalysis: "Break-Even Analysis",
+        breakEvenTitle: "Break-Even Analysis",
+        breakEvenSubtitle: "Break-even point and contribution margin analysis",
+        productInfo: "Product Information",
+        productName: "Product Name",
+        sellingPrice: "Selling Price",
+        variableCosts: "Variable Costs",
+        variableCostPerUnit: "Variable Cost per Unit",
+        variableCostBreakdown: "Breakdown (optional)",
+        fixedCosts: "Fixed Costs",
+        totalFixedCosts: "Total Fixed Costs",
+        fixedCostBreakdown: "Breakdown (optional)",
+        targetAnalysis: "Target Analysis (Optional)",
+        targetProfit: "Target Profit",
+        expectedSales: "Expected Sales",
+        calculateBreakEven: "🧮 Calculate Break-Even",
+        contributionMargin: "Contribution Margin",
+        contributionMarginRatio: "Contribution Margin Ratio",
+        breakEvenUnits: "Break-Even Point (Units)",
+        breakEvenRevenue: "Break-Even Point (Revenue)",
+        unitsForTarget: "Units for Target Profit",
+        marginOfSafety: "Margin of Safety",
+        marginOfSafetyPercent: "Margin of Safety %",
+        operatingLeverage: "Operating Leverage"
     },
     
     fr: {
