@@ -15,56 +15,82 @@ async function exportPageToPDF(pageId) {
     document.body.style.cursor = 'wait';
     
     try {
-        // Temporarily hide export buttons for cleaner screenshot
+        // Temporarily hide export buttons and sidebar for cleaner screenshot
         const exportButtons = element.querySelectorAll('.export-buttons');
-        exportButtons.forEach(btn => btn.style.display = 'none');
+        const sidebar = document.querySelector('.sidebar');
+        const mobileToggle = document.querySelector('.mobile-menu-toggle');
         
-        // Capture the page as canvas
+        exportButtons.forEach(btn => btn.style.display = 'none');
+        if (sidebar) sidebar.style.display = 'none';
+        if (mobileToggle) mobileToggle.style.display = 'none';
+        
+        // Wait a bit for any animations to complete
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Capture the page as canvas with better settings
         const canvas = await html2canvas(element, {
             scale: 2,
             useCORS: true,
+            allowTaint: true,
             logging: false,
-            backgroundColor: '#f5f7fa',
+            backgroundColor: '#ffffff',
             windowWidth: element.scrollWidth,
-            windowHeight: element.scrollHeight
+            windowHeight: element.scrollHeight,
+            onclone: (clonedDoc) => {
+                // Ensure charts are visible in the clone
+                const charts = clonedDoc.querySelectorAll('canvas');
+                charts.forEach(chart => {
+                    chart.style.maxWidth = '100%';
+                    chart.style.height = 'auto';
+                });
+            }
         });
         
-        // Restore export buttons
+        // Restore hidden elements
         exportButtons.forEach(btn => btn.style.display = '');
+        if (sidebar) sidebar.style.display = '';
+        if (mobileToggle) mobileToggle.style.display = '';
         
         // Convert canvas to PDF
         const { jsPDF } = window.jspdf;
-        const imgData = canvas.toDataURL('image/png');
+        const imgData = canvas.toDataURL('image/png', 1.0);
         
         // Calculate PDF dimensions
         const imgWidth = 210; // A4 width in mm
         const pageHeight = 297; // A4 height in mm
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        let heightLeft = imgHeight;
         
         const doc = new jsPDF('p', 'mm', 'a4');
-        let position = 0;
         
-        // Add image to PDF (handle multiple pages if needed)
-        doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-        
-        while (heightLeft >= 0) {
-            position = heightLeft - imgHeight;
-            doc.addPage();
-            doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        // If content fits in one page
+        if (imgHeight <= pageHeight) {
+            doc.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight, undefined, 'FAST');
+        } else {
+            // Multiple pages needed
+            let heightLeft = imgHeight;
+            let position = 0;
+            
+            doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
             heightLeft -= pageHeight;
+            
+            while (heightLeft > 0) {
+                position = heightLeft - imgHeight;
+                doc.addPage();
+                doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+                heightLeft -= pageHeight;
+            }
         }
         
         // Get page title for filename
         const title = element.querySelector('h1')?.textContent.trim() || 'export';
-        const filename = title.toLowerCase().replace(/\s+/g, '-') + '-' + new Date().toISOString().split('T')[0] + '.pdf';
+        const cleanTitle = title.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+        const filename = cleanTitle + '-' + new Date().toISOString().split('T')[0] + '.pdf';
         
         doc.save(filename);
         
     } catch (error) {
         console.error('Error exporting to PDF:', error);
-        alert('Errore durante l\'esportazione PDF. Riprova.');
+        alert('Errore durante l\'esportazione PDF: ' + error.message);
     } finally {
         document.body.style.cursor = originalCursor;
     }
