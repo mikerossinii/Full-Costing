@@ -280,7 +280,36 @@ const translations = {
         totalEndingWIP: "Total WIP Final",
         finishedGoods: "PRODUITS FINIS",
         units: "unités",
-        unit: "unité"
+        unit: "unité",
+        
+        // Break-Even
+        breakEvenAnalysis: "Analyse du Seuil de Rentabilité",
+        breakEvenTitle: "Analyse du Seuil de Rentabilité",
+        breakEvenSubtitle: "Analyse du point mort et marge de contribution",
+        productInfo: "Informations Produit",
+        productName: "Nom du Produit",
+        sellingPrice: "Prix de Vente",
+        variableCosts: "Coûts Variables",
+        variableCostPerUnit: "Coût Variable par Unité",
+        variableCostBreakdown: "Détail (optionnel)",
+        fixedCosts: "Coûts Fixes",
+        totalFixedCosts: "Coûts Fixes Totaux",
+        fixedCostBreakdown: "Détail (optionnel)",
+        targetAnalysis: "Analyse Cible (Optionnel)",
+        targetProfit: "Profit Cible",
+        expectedSales: "Ventes Prévues",
+        calculateBreakEven: "🧮 Calculer Seuil de Rentabilité",
+        contributionMargin: "Marge de Contribution",
+        contributionMarginRatio: "Ratio de Marge de Contribution",
+        breakEvenUnits: "Seuil de Rentabilité (Unités)",
+        breakEvenRevenue: "Seuil de Rentabilité (Chiffre d'Affaires)",
+        unitsForTarget: "Unités pour Profit Cible",
+        marginOfSafety: "Marge de Sécurité",
+        marginOfSafetyPercent: "Marge de Sécurité %",
+        operatingLeverage: "Levier Opérationnel",
+        breakEvenChart: "Graphique Seuil de Rentabilité",
+        revenue: "Chiffre d'Affaires",
+        totalCost: "Coût Total"
     },
     
     es: {
@@ -354,7 +383,36 @@ const translations = {
         totalEndingWIP: "Total WIP Final",
         finishedGoods: "PRODUCTOS TERMINADOS",
         units: "unidades",
-        unit: "unidad"
+        unit: "unidad",
+        
+        // Break-Even
+        breakEvenAnalysis: "Análisis de Punto de Equilibrio",
+        breakEvenTitle: "Análisis de Punto de Equilibrio",
+        breakEvenSubtitle: "Análisis del punto de equilibrio y margen de contribución",
+        productInfo: "Información del Producto",
+        productName: "Nombre del Producto",
+        sellingPrice: "Precio de Venta",
+        variableCosts: "Costos Variables",
+        variableCostPerUnit: "Costo Variable por Unidad",
+        variableCostBreakdown: "Detalle (opcional)",
+        fixedCosts: "Costos Fijos",
+        totalFixedCosts: "Costos Fijos Totales",
+        fixedCostBreakdown: "Detalle (opcional)",
+        targetAnalysis: "Análisis Objetivo (Opcional)",
+        targetProfit: "Beneficio Objetivo",
+        expectedSales: "Ventas Esperadas",
+        calculateBreakEven: "🧮 Calcular Punto de Equilibrio",
+        contributionMargin: "Margen de Contribución",
+        contributionMarginRatio: "Ratio de Margen de Contribución",
+        breakEvenUnits: "Punto de Equilibrio (Unidades)",
+        breakEvenRevenue: "Punto de Equilibrio (Ingresos)",
+        unitsForTarget: "Unidades para Beneficio Objetivo",
+        marginOfSafety: "Margen de Seguridad",
+        marginOfSafetyPercent: "Margen de Seguridad %",
+        operatingLeverage: "Apalancamiento Operativo",
+        breakEvenChart: "Gráfico Punto de Equilibrio",
+        revenue: "Ingresos",
+        totalCost: "Costo Total"
     },
     
     ca: {
@@ -428,7 +486,36 @@ const translations = {
         totalEndingWIP: "Total WIP Final",
         finishedGoods: "PRODUCTES ACABATS",
         units: "unitats",
-        unit: "unitat"
+        unit: "unitat",
+        
+        // Break-Even
+        breakEvenAnalysis: "Anàlisi del Punt d'Equilibri",
+        breakEvenTitle: "Anàlisi del Punt d'Equilibri",
+        breakEvenSubtitle: "Anàlisi del punt d'equilibri i marge de contribució",
+        productInfo: "Informació del Producte",
+        productName: "Nom del Producte",
+        sellingPrice: "Preu de Venda",
+        variableCosts: "Costos Variables",
+        variableCostPerUnit: "Cost Variable per Unitat",
+        variableCostBreakdown: "Detall (opcional)",
+        fixedCosts: "Costos Fixos",
+        totalFixedCosts: "Costos Fixos Totals",
+        fixedCostBreakdown: "Detall (opcional)",
+        targetAnalysis: "Anàlisi Objectiu (Opcional)",
+        targetProfit: "Benefici Objectiu",
+        expectedSales: "Vendes Esperades",
+        calculateBreakEven: "🧮 Calcular Punt d'Equilibri",
+        contributionMargin: "Marge de Contribució",
+        contributionMarginRatio: "Ràtio de Marge de Contribució",
+        breakEvenUnits: "Punt d'Equilibri (Unitats)",
+        breakEvenRevenue: "Punt d'Equilibri (Ingressos)",
+        unitsForTarget: "Unitats per Benefici Objectiu",
+        marginOfSafety: "Marge de Seguretat",
+        marginOfSafetyPercent: "Marge de Seguretat %",
+        operatingLeverage: "Palanquejament Operatiu",
+        breakEvenChart: "Gràfic Punt d'Equilibri",
+        revenue: "Ingressos",
+        totalCost: "Cost Total"
     }
 };
 
