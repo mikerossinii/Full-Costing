@@ -7,9 +7,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Cost Accounting Tools</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -643,8 +644,20 @@
         <!-- Reciprocal Method Page -->
         <div id="reciprocal-page" class="page active">
             <div class="container">
-                <h1><span style="font-size: 1.2em;">🔄</span> <span data-i18n="reciprocalTitle">Reciprocal Method</span></h1>
-                <p class="subtitle" data-i18n="reciprocalSubtitle">Risoluzione di esercizi con Simultaneous Equations</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+                    <div>
+                        <h1><span style="font-size: 1.2em;">🔄</span> <span data-i18n="reciprocalTitle">Reciprocal Method</span></h1>
+                        <p class="subtitle" data-i18n="reciprocalSubtitle">Risoluzione di esercizi con Simultaneous Equations</p>
+                    </div>
+                    <div class="export-buttons">
+                        <button class="export-btn" onclick="exportPageToPDF('reciprocal-page')">
+                            📄 <span data-i18n="exportPDF">PDF</span>
+                        </button>
+                        <button class="export-btn" onclick="exportPageToExcel('reciprocal-page')">
+                            📊 <span data-i18n="exportExcel">Excel</span>
+                        </button>
+                    </div>
+                </div>
                 
                 <div class="section">
                     <div class="section-title"><span class="step-number">1</span><span data-i18n="step1Title">Definisci i Dipartimenti</span></div>
@@ -684,16 +697,6 @@
                 
                 <div class="results" id="reciprocalResults">
                     <div class="section-title">📊 <span data-i18n="results">Risultati</span></div>
-                    
-                    <div class="export-buttons">
-                        <button class="export-btn" onclick="exportReciprocalToPDF()">
-                            📄 <span data-i18n="exportPDF">Esporta PDF</span>
-                        </button>
-                        <button class="export-btn" onclick="exportReciprocalToExcel()">
-                            📊 <span data-i18n="exportExcel">Esporta Excel</span>
-                        </button>
-                    </div>
-                    
                     <div class="results-grid">
                         <div class="result-card">
                             <h3 data-i18n="supportDepts">Dipartimenti di Supporto</h3>
@@ -713,8 +716,20 @@
         <!-- WIP Valuation Page -->
         <div id="wip-page" class="page">
             <div class="container">
-                <h1><span style="font-size: 1.2em;">📦</span> <span data-i18n="wipTitle">WIP Valuation</span></h1>
-                <p class="subtitle" data-i18n="wipSubtitle">Calcolo della valutazione del Work in Process</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+                    <div>
+                        <h1><span style="font-size: 1.2em;">📦</span> <span data-i18n="wipTitle">WIP Valuation</span></h1>
+                        <p class="subtitle" data-i18n="wipSubtitle">Calcolo della valutazione del Work in Process</p>
+                    </div>
+                    <div class="export-buttons">
+                        <button class="export-btn" onclick="exportPageToPDF('wip-page')">
+                            📄 <span data-i18n="exportPDF">PDF</span>
+                        </button>
+                        <button class="export-btn" onclick="exportPageToExcel('wip-page')">
+                            📊 <span data-i18n="exportExcel">Excel</span>
+                        </button>
+                    </div>
+                </div>
                 
                 <div class="section">
                     <div class="section-title"><span class="step-number">1</span><span data-i18n="baseConfig">Configurazione Base</span></div>
@@ -794,16 +809,6 @@
                 
                 <div class="results" id="wipResults">
                     <div class="section-title">📊 <span data-i18n="wipResults">Risultati WIP</span></div>
-                    
-                    <div class="export-buttons">
-                        <button class="export-btn" onclick="exportWIPToPDF()">
-                            📄 <span data-i18n="exportPDF">Esporta PDF</span>
-                        </button>
-                        <button class="export-btn" onclick="exportWIPToExcel()">
-                            📊 <span data-i18n="exportExcel">Esporta Excel</span>
-                        </button>
-                    </div>
-                    
                     <div id="wipResultsContent"></div>
                 </div>
             </div>
@@ -812,8 +817,20 @@
         <!-- Break-Even Analysis Page -->
         <div id="breakeven-page" class="page">
             <div class="container">
-                <h1><span style="font-size: 1.2em;">📊</span> <span data-i18n="breakEvenTitle">Break-Even Analysis</span></h1>
-                <p class="subtitle" data-i18n="breakEvenSubtitle">Analisi del punto di pareggio e margine di contribuzione</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+                    <div>
+                        <h1><span style="font-size: 1.2em;">📊</span> <span data-i18n="breakEvenTitle">Break-Even Analysis</span></h1>
+                        <p class="subtitle" data-i18n="breakEvenSubtitle">Analisi del punto di pareggio e margine di contribuzione</p>
+                    </div>
+                    <div class="export-buttons">
+                        <button class="export-btn" onclick="exportPageToPDF('breakeven-page')">
+                            📄 <span data-i18n="exportPDF">PDF</span>
+                        </button>
+                        <button class="export-btn" onclick="exportPageToExcel('breakeven-page')">
+                            📊 <span data-i18n="exportExcel">Excel</span>
+                        </button>
+                    </div>
+                </div>
                 
                 <div class="section">
                     <div class="section-title"><span class="step-number">1</span><span data-i18n="productInfo">Informazioni Prodotto</span></div>
@@ -885,16 +902,6 @@
                 
                 <div class="results" id="breakEvenResults">
                     <div class="section-title">📊 <span data-i18n="results">Risultati</span></div>
-                    
-                    <div class="export-buttons">
-                        <button class="export-btn" onclick="exportBreakEvenToPDF()">
-                            📄 <span data-i18n="exportPDF">Esporta PDF</span>
-                        </button>
-                        <button class="export-btn" onclick="exportBreakEvenToExcel()">
-                            📊 <span data-i18n="exportExcel">Esporta Excel</span>
-                        </button>
-                    </div>
-                    
                     <div id="breakEvenResultsContent"></div>
                 </div>
             </div>

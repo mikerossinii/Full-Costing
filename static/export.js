@@ -1,378 +1,185 @@
 // ============================================================================
-// EXPORT FUNCTIONS - PDF & EXCEL
+// EXPORT FUNCTIONS - PDF & EXCEL (Screenshot-based)
 // ============================================================================
 
-// ============================================================================
-// RECIPROCAL METHOD EXPORT
-// ============================================================================
-
-function exportReciprocalToPDF() {
-    if (!lastReciprocalResults) {
-        alert('Nessun risultato da esportare. Calcola prima i risultati.');
+// Export entire page to PDF with visual styling
+async function exportPageToPDF(pageId) {
+    const element = document.getElementById(pageId);
+    if (!element) {
+        alert('Pagina non trovata');
         return;
     }
     
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+    // Show loading indicator
+    const originalCursor = document.body.style.cursor;
+    document.body.style.cursor = 'wait';
     
-    const data = lastReciprocalResults.data;
-    const support_depts = lastReciprocalResults.support_depts;
-    const production_depts = lastReciprocalResults.production_depts;
-    
-    // Title
-    doc.setFontSize(18);
-    doc.text('Reciprocal Method Analysis', 14, 20);
-    doc.setFontSize(10);
-    doc.text(new Date().toLocaleDateString(), 14, 27);
-    
-    // Support Departments Table
-    doc.setFontSize(14);
-    doc.text('Support Departments', 14, 40);
-    
-    const supportData = [];
-    Object.entries(data.support_costs).forEach(([dept, cost]) => {
-        supportData.push([
-            dept,
-            '€' + support_depts[dept].toFixed(2),
-            '€' + cost.toFixed(2),
-            '€' + data.support_rates[dept].toFixed(4) + '/unit'
-        ]);
-    });
-    
-    doc.autoTable({
-        startY: 45,
-        head: [['Department', 'Direct Cost', 'Total Cost', 'Cost Rate']],
-        body: supportData,
-        theme: 'grid'
-    });
-    
-    // Production Departments Table
-    const finalY = doc.lastAutoTable.finalY + 10;
-    doc.setFontSize(14);
-    doc.text('Production Departments', 14, finalY);
-    
-    const productionData = [];
-    Object.entries(data.production_costs).forEach(([dept, cost]) => {
-        const direct = production_depts[dept];
-        productionData.push([
-            dept,
-            '€' + direct.toFixed(2),
-            '€' + (cost - direct).toFixed(2),
-            '€' + cost.toFixed(2)
-        ]);
-    });
-    
-    doc.autoTable({
-        startY: finalY + 5,
-        head: [['Department', 'Direct Cost', 'Allocated', 'Total Cost']],
-        body: productionData,
-        theme: 'grid'
-    });
-    
-    // Total
-    const finalY2 = doc.lastAutoTable.finalY + 10;
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.text('TOTAL: €' + data.total.toFixed(2), 14, finalY2);
-    
-    doc.save('reciprocal-method-analysis.pdf');
+    try {
+        // Temporarily hide export buttons for cleaner screenshot
+        const exportButtons = element.querySelectorAll('.export-buttons');
+        exportButtons.forEach(btn => btn.style.display = 'none');
+        
+        // Capture the page as canvas
+        const canvas = await html2canvas(element, {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#f5f7fa',
+            windowWidth: element.scrollWidth,
+            windowHeight: element.scrollHeight
+        });
+        
+        // Restore export buttons
+        exportButtons.forEach(btn => btn.style.display = '');
+        
+        // Convert canvas to PDF
+        const { jsPDF } = window.jspdf;
+        const imgData = canvas.toDataURL('image/png');
+        
+        // Calculate PDF dimensions
+        const imgWidth = 210; // A4 width in mm
+        const pageHeight = 297; // A4 height in mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let heightLeft = imgHeight;
+        
+        const doc = new jsPDF('p', 'mm', 'a4');
+        let position = 0;
+        
+        // Add image to PDF (handle multiple pages if needed)
+        doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+        
+        while (heightLeft >= 0) {
+            position = heightLeft - imgHeight;
+            doc.addPage();
+            doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+        }
+        
+        // Get page title for filename
+        const title = element.querySelector('h1')?.textContent.trim() || 'export';
+        const filename = title.toLowerCase().replace(/\s+/g, '-') + '-' + new Date().toISOString().split('T')[0] + '.pdf';
+        
+        doc.save(filename);
+        
+    } catch (error) {
+        console.error('Error exporting to PDF:', error);
+        alert('Errore durante l\'esportazione PDF. Riprova.');
+    } finally {
+        document.body.style.cursor = originalCursor;
+    }
 }
 
-function exportReciprocalToExcel() {
-    if (!lastReciprocalResults) {
-        alert('Nessun risultato da esportare. Calcola prima i risultati.');
+// Export page data to Excel
+async function exportPageToExcel(pageId) {
+    const element = document.getElementById(pageId);
+    if (!element) {
+        alert('Pagina non trovata');
         return;
     }
     
-    const data = lastReciprocalResults.data;
-    const support_depts = lastReciprocalResults.support_depts;
-    const production_depts = lastReciprocalResults.production_depts;
-    
-    // Support Departments Sheet
-    const supportData = [
-        ['Support Departments'],
-        ['Department', 'Direct Cost', 'Total Cost', 'Cost Rate', 'Total Units'],
-        ...Object.entries(data.support_costs).map(([dept, cost]) => [
-            dept,
-            support_depts[dept],
-            cost,
-            data.support_rates[dept],
-            data.support_total_units[dept]
-        ])
-    ];
-    
-    // Production Departments Sheet
-    const productionData = [
-        [],
-        ['Production Departments'],
-        ['Department', 'Direct Cost', 'Allocated', 'Total Cost'],
-        ...Object.entries(data.production_costs).map(([dept, cost]) => [
-            dept,
-            production_depts[dept],
-            cost - production_depts[dept],
-            cost
-        ]),
-        [],
-        ['TOTAL', '', '', data.total]
-    ];
-    
-    const ws = XLSX.utils.aoa_to_sheet([...supportData, ...productionData]);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Reciprocal Method');
-    
-    XLSX.writeFile(wb, 'reciprocal-method-analysis.xlsx');
-}
-
-// ============================================================================
-// WIP VALUATION EXPORT
-// ============================================================================
-
-function exportWIPToPDF() {
-    if (!lastWIPResults) {
-        alert('Nessun risultato da esportare. Calcola prima i risultati.');
-        return;
+    try {
+        const title = element.querySelector('h1')?.textContent.trim() || 'Export';
+        const data = [];
+        
+        // Add title
+        data.push([title]);
+        data.push(['Date: ' + new Date().toLocaleDateString()]);
+        data.push([]);
+        
+        // Extract data from sections
+        const sections = element.querySelectorAll('.section');
+        sections.forEach(section => {
+            const sectionTitle = section.querySelector('.section-title')?.textContent.trim();
+            if (sectionTitle) {
+                data.push([sectionTitle]);
+                data.push([]);
+            }
+            
+            // Extract input fields
+            const inputs = section.querySelectorAll('.cost-input');
+            inputs.forEach(input => {
+                const label = input.querySelector('label')?.textContent.trim();
+                const value = input.querySelector('input, select')?.value;
+                if (label && value) {
+                    data.push([label, value]);
+                }
+            });
+            
+            // Extract tables
+            const tables = section.querySelectorAll('table');
+            tables.forEach(table => {
+                const headers = Array.from(table.querySelectorAll('th')).map(th => th.textContent.trim());
+                if (headers.length > 0) {
+                    data.push([]);
+                    data.push(headers);
+                }
+                
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const cells = Array.from(row.querySelectorAll('td')).map(td => {
+                        const input = td.querySelector('input');
+                        return input ? input.value : td.textContent.trim();
+                    });
+                    if (cells.length > 0) {
+                        data.push(cells);
+                    }
+                });
+            });
+            
+            data.push([]);
+        });
+        
+        // Extract results
+        const results = element.querySelectorAll('.result-card');
+        results.forEach(card => {
+            const cardTitle = card.querySelector('h3')?.textContent.trim();
+            if (cardTitle) {
+                data.push([cardTitle]);
+            }
+            
+            const items = card.querySelectorAll('.result-item');
+            items.forEach(item => {
+                const spans = item.querySelectorAll('span');
+                if (spans.length >= 2) {
+                    data.push([spans[0].textContent.trim(), spans[1].textContent.trim()]);
+                }
+            });
+            data.push([]);
+        });
+        
+        // Extract detail sections
+        const details = element.querySelectorAll('.detail-section');
+        details.forEach(detail => {
+            const detailTitle = detail.querySelector('h4')?.textContent.trim();
+            if (detailTitle) {
+                data.push([detailTitle]);
+            }
+            
+            const allocations = detail.querySelectorAll('.allocation-detail');
+            allocations.forEach(alloc => {
+                data.push([alloc.textContent.trim()]);
+            });
+            data.push([]);
+        });
+        
+        // Extract total banner
+        const banner = element.querySelector('.total-banner');
+        if (banner) {
+            data.push([]);
+            data.push([banner.textContent.trim()]);
+        }
+        
+        // Create workbook and save
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Data');
+        
+        const filename = title.toLowerCase().replace(/\s+/g, '-') + '-' + new Date().toISOString().split('T')[0] + '.xlsx';
+        XLSX.writeFile(wb, filename);
+        
+    } catch (error) {
+        console.error('Error exporting to Excel:', error);
+        alert('Errore durante l\'esportazione Excel. Riprova.');
     }
-    
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const data = lastWIPResults;
-    
-    // Title
-    doc.setFontSize(18);
-    doc.text('WIP Valuation Analysis', 14, 20);
-    doc.setFontSize(10);
-    doc.text('Method: ' + data.method, 14, 27);
-    doc.text(new Date().toLocaleDateString(), 14, 32);
-    
-    // Physical Flow
-    doc.setFontSize(14);
-    doc.text('Physical Flow', 14, 45);
-    
-    const physicalData = [
-        ['Opening WIP', data.physical_flow.opening_wip + ' units'],
-        ['Started', data.physical_flow.started + ' units'],
-        ['Completed', data.physical_flow.completed + ' units'],
-        ['Ending WIP', data.physical_flow.ending_wip + ' units']
-    ];
-    
-    doc.autoTable({
-        startY: 50,
-        body: physicalData,
-        theme: 'grid'
-    });
-    
-    // Equivalent Units
-    const finalY = doc.lastAutoTable.finalY + 10;
-    doc.setFontSize(14);
-    doc.text('Equivalent Units', 14, finalY);
-    
-    const euData = [
-        ['Materials', data.equivalent_units.materials.toFixed(2) + ' EU'],
-        ['Conversion', data.equivalent_units.conversion.toFixed(2) + ' EU']
-    ];
-    
-    doc.autoTable({
-        startY: finalY + 5,
-        body: euData,
-        theme: 'grid'
-    });
-    
-    // Cost per EU
-    const finalY2 = doc.lastAutoTable.finalY + 10;
-    doc.setFontSize(14);
-    doc.text('Cost per Equivalent Unit', 14, finalY2);
-    
-    const costData = [
-        ['Materials', '€' + data.cost_per_eu.materials.toFixed(4) + '/EU'],
-        ['Conversion', '€' + data.cost_per_eu.conversion.toFixed(4) + '/EU'],
-        ['Total', '€' + data.cost_per_eu.total.toFixed(4) + '/EU']
-    ];
-    
-    doc.autoTable({
-        startY: finalY2 + 5,
-        body: costData,
-        theme: 'grid'
-    });
-    
-    // Valuation
-    const finalY3 = doc.lastAutoTable.finalY + 10;
-    doc.setFontSize(14);
-    doc.text('Valuation', 14, finalY3);
-    
-    const valuationData = [
-        ['Finished Goods', '€' + data.valuation.finished_goods.toFixed(2)],
-        ['Ending WIP - Materials', '€' + data.valuation.ending_wip_materials.toFixed(2)],
-        ['Ending WIP - Conversion', '€' + data.valuation.ending_wip_conversion.toFixed(2)],
-        ['Ending WIP - Total', '€' + data.valuation.ending_wip_total.toFixed(2)]
-    ];
-    
-    doc.autoTable({
-        startY: finalY3 + 5,
-        body: valuationData,
-        theme: 'grid'
-    });
-    
-    // Total
-    const finalY4 = doc.lastAutoTable.finalY + 10;
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.text('TOTAL COSTS: €' + data.total_costs.toFixed(2), 14, finalY4);
-    
-    doc.save('wip-valuation-analysis.pdf');
-}
-
-function exportWIPToExcel() {
-    if (!lastWIPResults) {
-        alert('Nessun risultato da esportare. Calcola prima i risultati.');
-        return;
-    }
-    
-    const data = lastWIPResults;
-    
-    const excelData = [
-        ['WIP Valuation Analysis'],
-        ['Method:', data.method],
-        ['Date:', new Date().toLocaleDateString()],
-        [],
-        ['Physical Flow'],
-        ['Opening WIP', data.physical_flow.opening_wip],
-        ['Started', data.physical_flow.started],
-        ['Completed', data.physical_flow.completed],
-        ['Ending WIP', data.physical_flow.ending_wip],
-        [],
-        ['Equivalent Units'],
-        ['Materials', data.equivalent_units.materials],
-        ['Conversion', data.equivalent_units.conversion],
-        [],
-        ['Cost per Equivalent Unit'],
-        ['Materials', data.cost_per_eu.materials],
-        ['Conversion', data.cost_per_eu.conversion],
-        ['Total', data.cost_per_eu.total],
-        [],
-        ['Valuation'],
-        ['Finished Goods', data.valuation.finished_goods],
-        ['Ending WIP - Materials', data.valuation.ending_wip_materials],
-        ['Ending WIP - Conversion', data.valuation.ending_wip_conversion],
-        ['Ending WIP - Total', data.valuation.ending_wip_total],
-        [],
-        ['TOTAL COSTS', data.total_costs]
-    ];
-    
-    const ws = XLSX.utils.aoa_to_sheet(excelData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'WIP Valuation');
-    
-    XLSX.writeFile(wb, 'wip-valuation-analysis.xlsx');
-}
-
-// ============================================================================
-// BREAK-EVEN ANALYSIS EXPORT
-// ============================================================================
-
-function exportBreakEvenToPDF() {
-    if (!lastBreakEvenResults) {
-        alert('Nessun risultato da esportare. Calcola prima i risultati.');
-        return;
-    }
-    
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const data = lastBreakEvenResults;
-    
-    // Title
-    doc.setFontSize(18);
-    doc.text('Break-Even Analysis', 14, 20);
-    doc.setFontSize(12);
-    doc.text('Product: ' + data.productName, 14, 28);
-    doc.setFontSize(10);
-    doc.text(new Date().toLocaleDateString(), 14, 34);
-    
-    // Input Data
-    doc.setFontSize(14);
-    doc.text('Input Data', 14, 47);
-    
-    const inputData = [
-        ['Selling Price', '€' + data.sellingPrice.toFixed(2)],
-        ['Variable Cost per Unit', '€' + data.variableCost.toFixed(2)],
-        ['Fixed Costs', '€' + data.fixedCosts.toFixed(2)],
-        ['Target Profit', '€' + data.targetProfit.toFixed(2)],
-        ['Expected Sales', data.expectedSales + ' units']
-    ];
-    
-    doc.autoTable({
-        startY: 52,
-        body: inputData,
-        theme: 'grid'
-    });
-    
-    // Results
-    const finalY = doc.lastAutoTable.finalY + 10;
-    doc.setFontSize(14);
-    doc.text('Results', 14, finalY);
-    
-    const resultsData = [
-        ['Contribution Margin', '€' + data.contributionMargin.toFixed(2) + '/unit'],
-        ['Contribution Margin Ratio', data.contributionMarginRatio.toFixed(2) + '%'],
-        ['Break-Even Point (Units)', Math.ceil(data.breakEvenUnits) + ' units'],
-        ['Break-Even Point (Revenue)', '€' + data.breakEvenRevenue.toFixed(2)],
-        ['Units for Target Profit', Math.ceil(data.unitsForTarget) + ' units']
-    ];
-    
-    if (data.expectedSales > 0) {
-        resultsData.push(
-            ['Margin of Safety', data.marginOfSafety.toFixed(0) + ' units (' + data.marginOfSafetyPercent.toFixed(2) + '%)'],
-            ['Operating Leverage', data.operatingLeverage.toFixed(2)]
-        );
-    }
-    
-    doc.autoTable({
-        startY: finalY + 5,
-        body: resultsData,
-        theme: 'grid'
-    });
-    
-    doc.save('break-even-analysis.pdf');
-}
-
-function exportBreakEvenToExcel() {
-    if (!lastBreakEvenResults) {
-        alert('Nessun risultato da esportare. Calcola prima i risultati.');
-        return;
-    }
-    
-    const data = lastBreakEvenResults;
-    
-    const excelData = [
-        ['Break-Even Analysis'],
-        ['Product:', data.productName],
-        ['Date:', new Date().toLocaleDateString()],
-        [],
-        ['Input Data'],
-        ['Selling Price', data.sellingPrice],
-        ['Variable Cost per Unit', data.variableCost],
-        ['Fixed Costs', data.fixedCosts],
-        ['Target Profit', data.targetProfit],
-        ['Expected Sales', data.expectedSales],
-        [],
-        ['Results'],
-        ['Contribution Margin', data.contributionMargin],
-        ['Contribution Margin Ratio (%)', data.contributionMarginRatio],
-        ['Break-Even Point (Units)', Math.ceil(data.breakEvenUnits)],
-        ['Break-Even Point (Revenue)', data.breakEvenRevenue],
-        ['Units for Target Profit', Math.ceil(data.unitsForTarget)]
-    ];
-    
-    if (data.expectedSales > 0) {
-        excelData.push(
-            ['Margin of Safety (Units)', data.marginOfSafety],
-            ['Margin of Safety (%)', data.marginOfSafetyPercent],
-            ['Operating Leverage', data.operatingLeverage]
-        );
-    }
-    
-    const ws = XLSX.utils.aoa_to_sheet(excelData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Break-Even Analysis');
-    
-    XLSX.writeFile(wb, 'break-even-analysis.xlsx');
 }
