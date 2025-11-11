@@ -7,6 +7,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Cost Accounting Tools</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -440,6 +443,36 @@
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
         
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .export-btn {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 10px 25px;
+            font-size: 1em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .export-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+        }
+        
         .results {
             margin-top: 30px;
             display: none;
@@ -651,6 +684,16 @@
                 
                 <div class="results" id="reciprocalResults">
                     <div class="section-title">📊 <span data-i18n="results">Risultati</span></div>
+                    
+                    <div class="export-buttons">
+                        <button class="export-btn" onclick="exportReciprocalToPDF()">
+                            📄 <span data-i18n="exportPDF">Esporta PDF</span>
+                        </button>
+                        <button class="export-btn" onclick="exportReciprocalToExcel()">
+                            📊 <span data-i18n="exportExcel">Esporta Excel</span>
+                        </button>
+                    </div>
+                    
                     <div class="results-grid">
                         <div class="result-card">
                             <h3 data-i18n="supportDepts">Dipartimenti di Supporto</h3>
@@ -751,6 +794,16 @@
                 
                 <div class="results" id="wipResults">
                     <div class="section-title">📊 <span data-i18n="wipResults">Risultati WIP</span></div>
+                    
+                    <div class="export-buttons">
+                        <button class="export-btn" onclick="exportWIPToPDF()">
+                            📄 <span data-i18n="exportPDF">Esporta PDF</span>
+                        </button>
+                        <button class="export-btn" onclick="exportWIPToExcel()">
+                            📊 <span data-i18n="exportExcel">Esporta Excel</span>
+                        </button>
+                    </div>
+                    
                     <div id="wipResultsContent"></div>
                 </div>
             </div>
@@ -832,6 +885,16 @@
                 
                 <div class="results" id="breakEvenResults">
                     <div class="section-title">📊 <span data-i18n="results">Risultati</span></div>
+                    
+                    <div class="export-buttons">
+                        <button class="export-btn" onclick="exportBreakEvenToPDF()">
+                            📄 <span data-i18n="exportPDF">Esporta PDF</span>
+                        </button>
+                        <button class="export-btn" onclick="exportBreakEvenToExcel()">
+                            📊 <span data-i18n="exportExcel">Esporta Excel</span>
+                        </button>
+                    </div>
+                    
                     <div id="breakEvenResultsContent"></div>
                 </div>
             </div>
@@ -840,5 +903,6 @@
     
     <script src="/static/translations.js"></script>
     <script src="/static/app.js"></script>
+    <script src="/static/export.js"></script>
 </body>
 </html>

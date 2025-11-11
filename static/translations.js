@@ -103,7 +103,9 @@ const translations = {
         operatingLeverage: "Leva Operativa",
         breakEvenChart: "Grafico Break-Even",
         revenue: "Ricavi",
-        totalCost: "Costo Totale"
+        totalCost: "Costo Totale",
+        exportPDF: "Esporta PDF",
+        exportExcel: "Esporta Excel"
     },
     
     en: {
@@ -206,7 +208,9 @@ const translations = {
         operatingLeverage: "Operating Leverage",
         breakEvenChart: "Break-Even Chart",
         revenue: "Revenue",
-        totalCost: "Total Cost"
+        totalCost: "Total Cost",
+        exportPDF: "Export PDF",
+        exportExcel: "Export Excel"
     },
     
     fr: {
@@ -309,7 +313,9 @@ const translations = {
         operatingLeverage: "Levier Opérationnel",
         breakEvenChart: "Graphique Seuil de Rentabilité",
         revenue: "Chiffre d'Affaires",
-        totalCost: "Coût Total"
+        totalCost: "Coût Total",
+        exportPDF: "Exporter PDF",
+        exportExcel: "Exporter Excel"
     },
     
     es: {
@@ -412,7 +418,9 @@ const translations = {
         operatingLeverage: "Apalancamiento Operativo",
         breakEvenChart: "Gráfico Punto de Equilibrio",
         revenue: "Ingresos",
-        totalCost: "Costo Total"
+        totalCost: "Costo Total",
+        exportPDF: "Exportar PDF",
+        exportExcel: "Exportar Excel"
     },
     
     ca: {
@@ -515,7 +523,9 @@ const translations = {
         operatingLeverage: "Palanquejament Operatiu",
         breakEvenChart: "Gràfic Punt d'Equilibri",
         revenue: "Ingressos",
-        totalCost: "Cost Total"
+        totalCost: "Cost Total",
+        exportPDF: "Exportar PDF",
+        exportExcel: "Exportar Excel"
     }
 };
 
