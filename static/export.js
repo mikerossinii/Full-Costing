@@ -29,19 +29,34 @@ async function exportPageToPDF(pageId) {
         
         // Capture the page as canvas with better settings
         const canvas = await html2canvas(element, {
-            scale: 2,
+            scale: 3,
             useCORS: true,
             allowTaint: true,
             logging: false,
             backgroundColor: '#ffffff',
             windowWidth: element.scrollWidth,
             windowHeight: element.scrollHeight,
+            imageTimeout: 0,
+            removeContainer: true,
             onclone: (clonedDoc) => {
                 // Ensure charts are visible in the clone
                 const charts = clonedDoc.querySelectorAll('canvas');
                 charts.forEach(chart => {
                     chart.style.maxWidth = '100%';
                     chart.style.height = 'auto';
+                });
+                
+                // Increase contrast and opacity for all elements
+                const allElements = clonedDoc.querySelectorAll('*');
+                allElements.forEach(el => {
+                    const style = window.getComputedStyle(el);
+                    if (style.opacity && parseFloat(style.opacity) < 1) {
+                        el.style.opacity = '1';
+                    }
+                    // Darken text colors
+                    if (style.color) {
+                        el.style.color = style.color.replace(/rgba?\((\d+),\s*(\d+),\s*(\d+).*\)/, 'rgb($1, $2, $3)');
+                    }
                 });
             }
         });
@@ -51,9 +66,39 @@ async function exportPageToPDF(pageId) {
         if (sidebar) sidebar.style.display = '';
         if (mobileToggle) mobileToggle.style.display = '';
         
-        // Convert canvas to PDF
+        // Convert canvas to PDF with maximum quality
         const { jsPDF } = window.jspdf;
-        const imgData = canvas.toDataURL('image/png', 1.0);
+        
+        // Create a temporary canvas to enhance contrast
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = canvas.height;
+        const ctx = tempCanvas.getContext('2d');
+        
+        // Draw original image
+        ctx.drawImage(canvas, 0, 0);
+        
+        // Enhance contrast and brightness
+        const imageData = ctx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+        const data = imageData.data;
+        
+        const contrast = 1.2; // Increase contrast
+        const brightness = 10; // Increase brightness
+        
+        for (let i = 0; i < data.length; i += 4) {
+            // Apply contrast
+            data[i] = ((data[i] - 128) * contrast + 128) + brightness;     // Red
+            data[i + 1] = ((data[i + 1] - 128) * contrast + 128) + brightness; // Green
+            data[i + 2] = ((data[i + 2] - 128) * contrast + 128) + brightness; // Blue
+            
+            // Clamp values
+            data[i] = Math.min(255, Math.max(0, data[i]));
+            data[i + 1] = Math.min(255, Math.max(0, data[i + 1]));
+            data[i + 2] = Math.min(255, Math.max(0, data[i + 2]));
+        }
+        
+        ctx.putImageData(imageData, 0, 0);
+        const imgData = tempCanvas.toDataURL('image/jpeg', 0.98);
         
         // Calculate PDF dimensions
         const imgWidth = 210; // A4 width in mm
@@ -64,19 +109,19 @@ async function exportPageToPDF(pageId) {
         
         // If content fits in one page
         if (imgHeight <= pageHeight) {
-            doc.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight, undefined, 'FAST');
+            doc.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight, undefined, 'FAST');
         } else {
             // Multiple pages needed
             let heightLeft = imgHeight;
             let position = 0;
             
-            doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+            doc.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
             heightLeft -= pageHeight;
             
             while (heightLeft > 0) {
                 position = heightLeft - imgHeight;
                 doc.addPage();
-                doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+                doc.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
                 heightLeft -= pageHeight;
             }
         }
