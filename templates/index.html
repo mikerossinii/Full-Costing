@@ -138,6 +138,11 @@
             
             .container {
                 padding: 20px;
+                overflow-x: hidden;
+            }
+            
+            .section {
+                overflow-x: hidden;
             }
             
             h1 {
@@ -149,12 +154,14 @@
             }
             
             .dept-setup {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr !important;
                 gap: 15px;
+                display: grid !important;
             }
             
             .dept-list {
-                width: 100%;
+                width: 100% !important;
+                max-width: 100% !important;
             }
             
             .primary-costs {
