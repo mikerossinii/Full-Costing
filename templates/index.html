@@ -625,33 +625,33 @@
                 </div>
                 
                 <div class="section" id="step2" style="display: none;">
-                    <div class="section-title"><span class="step-number">2</span>Inserisci i Costi Primari</div>
+                    <div class="section-title"><span class="step-number">2</span><span data-i18n="step2Title">Inserisci i Costi Primari</span></div>
                     <div id="primaryCostsSection"></div>
-                    <button class="calculate-btn" onclick="setupServiceUnits()" style="margin-top: 15px;">Conferma Costi →</button>
+                    <button class="calculate-btn" onclick="setupServiceUnits()" style="margin-top: 15px;" data-i18n="confirmCosts">Conferma Costi →</button>
                 </div>
                 
                 <div class="section" id="step3" style="display: none;">
-                    <div class="section-title"><span class="step-number">3</span>Inserisci le Unità di Servizio Rese</div>
+                    <div class="section-title"><span class="step-number">3</span><span data-i18n="step3Title">Inserisci le Unità di Servizio Rese</span></div>
                     <div class="service-units-table" id="serviceUnitsSection"></div>
-                    <button class="calculate-btn" onclick="setupAllocationBases()" style="margin-top: 15px;">Conferma Unità →</button>
+                    <button class="calculate-btn" onclick="setupAllocationBases()" style="margin-top: 15px;" data-i18n="confirmUnits">Conferma Unità →</button>
                 </div>
                 
                 <div class="section" id="step4" style="display: none;">
-                    <div class="section-title"><span class="step-number">4</span>Basi di Allocazione (Opzionale)</div>
-                    <p style="margin-bottom: 15px; color: #666;">Inserisci le basi (es. w.u, machine hours) per calcolare i cost rates</p>
+                    <div class="section-title"><span class="step-number">4</span><span data-i18n="step4Title">Basi di Allocazione (Opzionale)</span></div>
+                    <p style="margin-bottom: 15px; color: #666;" data-i18n="step4Subtitle">Inserisci le basi (es. w.u, machine hours) per calcolare i cost rates</p>
                     <div id="allocationBasesSection"></div>
-                    <button class="calculate-btn" onclick="calculateReciprocal()" style="margin-top: 15px;">🧮 Calcola Risultati</button>
+                    <button class="calculate-btn" onclick="calculateReciprocal()" style="margin-top: 15px;" data-i18n="calculateResults">🧮 Calcola Risultati</button>
                 </div>
                 
                 <div class="results" id="reciprocalResults">
-                    <div class="section-title">📊 Risultati</div>
+                    <div class="section-title">📊 <span data-i18n="results">Risultati</span></div>
                     <div class="results-grid">
                         <div class="result-card">
-                            <h3>Dipartimenti di Supporto</h3>
+                            <h3 data-i18n="supportDepts">Dipartimenti di Supporto</h3>
                             <div id="supportResults"></div>
                         </div>
                         <div class="result-card">
-                            <h3>Dipartimenti di Produzione</h3>
+                            <h3 data-i18n="productionDepts">Dipartimenti di Produzione</h3>
                             <div id="productionResults"></div>
                         </div>
                     </div>
@@ -700,51 +700,51 @@
                 </div>
                 
                 <div class="section">
-                    <div class="section-title"><span class="step-number">3</span>Opening Work in Process</div>
+                    <div class="section-title"><span class="step-number">3</span><span data-i18n="openingWIP">Opening Work in Process</span></div>
                     <div class="wip-grid">
                         <div class="cost-input">
-                            <label>Unità in WIP Iniziale</label>
+                            <label data-i18n="unitsInWIP">Unità in WIP Iniziale</label>
                             <input type="number" id="wipOpeningUnits" value="20" step="1">
                         </div>
                         <div class="cost-input">
-                            <label>Completion % (CC%)</label>
+                            <label data-i18n="completionPercent">Completion % (CC%)</label>
                             <input type="number" id="wipOpeningCC" value="50" step="1" min="0" max="100">
                         </div>
                         <div class="cost-input">
-                            <label>Costo Materials WIP (€)</label>
+                            <label data-i18n="materialsCostWIP">Costo Materials WIP (€)</label>
                             <input type="number" id="wipOpeningMaterials" value="1320" step="0.01">
                         </div>
                         <div class="cost-input">
-                            <label>Costo Conversion WIP (€)</label>
+                            <label data-i18n="conversionCostWIP">Costo Conversion WIP (€)</label>
                             <input type="number" id="wipOpeningConversion" value="2160" step="0.01">
                         </div>
                     </div>
                 </div>
                 
                 <div class="section">
-                    <div class="section-title"><span class="step-number">4</span>Movimenti del Periodo</div>
+                    <div class="section-title"><span class="step-number">4</span><span data-i18n="periodMovements">Movimenti del Periodo</span></div>
                     <div class="wip-grid">
                         <div class="cost-input">
-                            <label>Unità Started</label>
+                            <label data-i18n="unitsStarted">Unità Started</label>
                             <input type="number" id="wipStarted" value="400" step="1">
                         </div>
                         <div class="cost-input">
-                            <label>Unità Completed</label>
+                            <label data-i18n="unitsCompleted">Unità Completed</label>
                             <input type="number" id="wipCompleted" value="350" step="1">
                         </div>
                         <div class="cost-input">
-                            <label>Ending WIP CC%</label>
+                            <label data-i18n="endingWIPCC">Ending WIP CC%</label>
                             <input type="number" id="wipEndingCC" value="60" step="1" min="0" max="100">
                         </div>
                     </div>
                 </div>
                 
                 <div style="text-align: center; margin-top: 20px;">
-                    <button class="calculate-btn" onclick="calculateWIP()">🧮 Calcola WIP Valuation</button>
+                    <button class="calculate-btn" onclick="calculateWIP()" data-i18n="calculateWIP">🧮 Calcola WIP Valuation</button>
                 </div>
                 
                 <div class="results" id="wipResults">
-                    <div class="section-title">📊 Risultati WIP</div>
+                    <div class="section-title">📊 <span data-i18n="wipResults">Risultati WIP</span></div>
                     <div id="wipResultsContent"></div>
                 </div>
             </div>

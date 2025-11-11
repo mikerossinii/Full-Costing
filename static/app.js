@@ -227,16 +227,16 @@ function displayReciprocalResults(data, support_depts, production_depts, allocat
                 <span>€${cost.toFixed(2)}</span>
             </div>
             <div class="result-item" style="font-size: 0.9em; color: #666;">
-                <span>Costo diretto</span>
+                <span data-i18n="directCost">${t('directCost')}</span>
                 <span>€${direct.toFixed(2)}</span>
             </div>
             <div class="result-item" style="font-size: 0.9em; color: #666;">
-                <span>Totale unità</span>
+                <span data-i18n="totalUnits">${t('totalUnits')}</span>
                 <span>${units.toFixed(0)}</span>
             </div>
             <div class="result-item" style="font-size: 0.9em; color: #667eea; margin-bottom: 15px;">
-                <span>Cost rate</span>
-                <span>€${rate.toFixed(4)}/unit</span>
+                <span data-i18n="costRate">${t('costRate')}</span>
+                <span>€${rate.toFixed(4)}/${t('unit')}</span>
             </div>
         `;
     });
@@ -251,11 +251,11 @@ function displayReciprocalResults(data, support_depts, production_depts, allocat
                 <span>€${cost.toFixed(2)}</span>
             </div>
             <div class="result-item" style="font-size: 0.9em; color: #666;">
-                <span>Costo diretto</span>
+                <span data-i18n="directCost">${t('directCost')}</span>
                 <span>€${direct.toFixed(2)}</span>
             </div>
             <div class="result-item" style="font-size: 0.9em; color: #666; margin-bottom: 15px;">
-                <span>Allocato</span>
+                <span data-i18n="allocated">${t('allocated')}</span>
                 <span>€${(cost - direct).toFixed(2)}</span>
             </div>
         `;
@@ -263,7 +263,7 @@ function displayReciprocalResults(data, support_depts, production_depts, allocat
         if (data.production_rates[dept]) {
             productionHTML += `
                 <div class="result-item" style="font-size: 0.9em; color: #667eea; margin-bottom: 15px;">
-                    <span>Cost rate</span>
+                    <span data-i18n="costRate">${t('costRate')}</span>
                     <span>€${data.production_rates[dept].toFixed(4)}/w.u</span>
                 </div>
             `;
@@ -275,26 +275,26 @@ function displayReciprocalResults(data, support_depts, production_depts, allocat
     Object.entries(data.production_details).forEach(([dept, details]) => {
         detailsHTML += `
             <div class="detail-section">
-                <h4>${dept} - Dettaglio Allocazioni</h4>
-                <div class="allocation-detail">Costo diretto: €${production_depts[dept].toFixed(2)}</div>
+                <h4>${dept} - ${t('allocationDetails')}</h4>
+                <div class="allocation-detail">${t('directCost')}: €${production_depts[dept].toFixed(2)}</div>
         `;
         details.forEach(detail => {
             detailsHTML += `
                 <div class="allocation-detail">
-                    Da ${detail.from}: ${detail.units} units × €${detail.rate.toFixed(4)}/unit = €${detail.allocated.toFixed(2)}
+                    Da ${detail.from}: ${detail.units} ${t('units')} × €${detail.rate.toFixed(4)}/${t('unit')} = €${detail.allocated.toFixed(2)}
                 </div>
             `;
         });
         detailsHTML += `
                 <div class="allocation-detail" style="font-weight: 600; color: #667eea; margin-top: 10px;">
-                    TOTALE: €${data.production_costs[dept].toFixed(2)}
+                    ${t('total').toUpperCase()}: €${data.production_costs[dept].toFixed(2)}
                 </div>
             </div>
         `;
     });
     document.getElementById('detailsSection').innerHTML = detailsHTML;
     
-    document.getElementById('totalBanner').textContent = `TOTALE GENERALE: €${data.total.toFixed(2)}`;
+    document.getElementById('totalBanner').textContent = `${t('totalGeneral').toUpperCase()}: €${data.total.toFixed(2)}`;
     
     document.getElementById('reciprocalResults').style.display = 'block';
     document.getElementById('reciprocalResults').scrollIntoView({ behavior: 'smooth' });
@@ -350,45 +350,45 @@ function displayWIPResults(data) {
     let html = `
         <div class="results-grid">
             <div class="result-card">
-                <h3>📊 Physical Flow</h3>
+                <h3>📊 ${t('physicalFlow')}</h3>
                 <div class="result-item">
-                    <span>Opening WIP</span>
-                    <span>${data.physical_flow.opening_wip} units</span>
+                    <span data-i18n="openingWIPLabel">${t('openingWIPLabel')}</span>
+                    <span>${data.physical_flow.opening_wip} ${t('units')}</span>
                 </div>
                 <div class="result-item">
-                    <span>Started</span>
-                    <span>${data.physical_flow.started} units</span>
+                    <span data-i18n="started">${t('started')}</span>
+                    <span>${data.physical_flow.started} ${t('units')}</span>
                 </div>
                 <div class="result-item">
-                    <span>Completed</span>
-                    <span>${data.physical_flow.completed} units</span>
+                    <span data-i18n="completed">${t('completed')}</span>
+                    <span>${data.physical_flow.completed} ${t('units')}</span>
                 </div>
                 <div class="result-item">
-                    <span>Started & Completed</span>
-                    <span>${data.physical_flow.started_and_completed} units</span>
+                    <span data-i18n="startedCompleted">${t('startedCompleted')}</span>
+                    <span>${data.physical_flow.started_and_completed} ${t('units')}</span>
                 </div>
                 <div class="result-item">
-                    <span>Ending WIP</span>
-                    <span>${data.physical_flow.ending_wip} units</span>
+                    <span data-i18n="endingWIP">${t('endingWIP')}</span>
+                    <span>${data.physical_flow.ending_wip} ${t('units')}</span>
                 </div>
             </div>
             
             <div class="result-card">
-                <h3>💰 Equivalent Units</h3>
+                <h3>💰 ${t('equivalentUnits')}</h3>
                 <div class="result-item">
-                    <span>Materials</span>
+                    <span data-i18n="materials">${t('materials')}</span>
                     <span>${data.equivalent_units.materials.toFixed(2)} EU</span>
                 </div>
                 <div class="result-item">
-                    <span>Conversion Costs</span>
+                    <span data-i18n="conversionCosts">${t('conversionCosts')}</span>
                     <span>${data.equivalent_units.conversion.toFixed(2)} EU</span>
                 </div>
             </div>
             
             <div class="result-card">
-                <h3>📈 Cost per Equivalent Unit</h3>
+                <h3>📈 ${t('costPerEU')}</h3>
                 <div class="result-item">
-                    <span>Materials</span>
+                    <span data-i18n="materials">${t('materials')}</span>
                     <span>€${data.cost_per_eu.materials.toFixed(4)}/EU</span>
                 </div>
                 <div class="result-item">
@@ -396,7 +396,7 @@ function displayWIPResults(data) {
                     <span>€${data.cost_per_eu.conversion.toFixed(4)}/EU</span>
                 </div>
                 <div class="result-item">
-                    <span>Total</span>
+                    <span data-i18n="total">${t('total')}</span>
                     <span>€${data.cost_per_eu.total.toFixed(4)}/EU</span>
                 </div>
             </div>
@@ -407,31 +407,31 @@ function displayWIPResults(data) {
     if (data.method === 'FIFO' && data.fifo_breakdown) {
         html += `
             <div class="detail-section" style="background: #e8f5e9; border-left-color: #4caf50;">
-                <h4>1️⃣ Completing Opening WIP (${data.physical_flow.opening_wip} units)</h4>
-                <div class="allocation-detail">Opening DM: €${data.fifo_breakdown.completing_opening.opening_dm.toFixed(2)}</div>
-                <div class="allocation-detail">Opening CC: €${data.fifo_breakdown.completing_opening.opening_cc.toFixed(2)}</div>
-                <div class="allocation-detail">Additional CC to complete: €${data.fifo_breakdown.completing_opening.additional_cc.toFixed(2)}</div>
+                <h4>1️⃣ ${t('completingOpeningWIP')} (${data.physical_flow.opening_wip} ${t('units')})</h4>
+                <div class="allocation-detail">${t('openingDM')}: €${data.fifo_breakdown.completing_opening.opening_dm.toFixed(2)}</div>
+                <div class="allocation-detail">${t('openingCC')}: €${data.fifo_breakdown.completing_opening.opening_cc.toFixed(2)}</div>
+                <div class="allocation-detail">${t('additionalCC')}: €${data.fifo_breakdown.completing_opening.additional_cc.toFixed(2)}</div>
                 <div class="allocation-detail" style="font-weight: 600; color: #4caf50; margin-top: 10px; font-size: 1.1em;">
-                    Total Opening WIP: €${data.fifo_breakdown.completing_opening.total.toFixed(2)}
+                    ${t('totalOpeningWIP')}: €${data.fifo_breakdown.completing_opening.total.toFixed(2)}
                 </div>
             </div>
             
             <div class="detail-section" style="background: #e3f2fd; border-left-color: #2196f3;">
-                <h4>2️⃣ Started and Completed (${data.fifo_breakdown.started_and_completed.units} units)</h4>
+                <h4>2️⃣ ${t('startedAndCompleted')} (${data.fifo_breakdown.started_and_completed.units} ${t('units')})</h4>
                 <div class="allocation-detail">
-                    ${data.fifo_breakdown.started_and_completed.units} units × €${data.cost_per_eu.total.toFixed(4)}/unit
+                    ${data.fifo_breakdown.started_and_completed.units} ${t('units')} × €${data.cost_per_eu.total.toFixed(4)}/${t('unit')}
                 </div>
                 <div class="allocation-detail" style="font-weight: 600; color: #2196f3; margin-top: 10px; font-size: 1.1em;">
-                    Total Started & Completed: €${data.fifo_breakdown.started_and_completed.cost.toFixed(2)}
+                    ${t('totalStartedCompleted')}: €${data.fifo_breakdown.started_and_completed.cost.toFixed(2)}
                 </div>
             </div>
             
             <div class="detail-section" style="background: #fff3e0; border-left-color: #ff9800;">
-                <h4>3️⃣ Ending WIP (${data.fifo_breakdown.ending_wip.units} units)</h4>
+                <h4>3️⃣ ${t('endingWIPSection')} (${data.fifo_breakdown.ending_wip.units} ${t('units')})</h4>
                 <div class="allocation-detail">DM (100%): ${data.fifo_breakdown.ending_wip.units} × €${data.cost_per_eu.materials.toFixed(4)} = €${data.fifo_breakdown.ending_wip.dm.toFixed(2)}</div>
                 <div class="allocation-detail">CC (${(data.physical_flow.ending_wip > 0 ? (data.valuation.ending_wip_conversion / data.cost_per_eu.conversion / data.physical_flow.ending_wip * 100) : 0).toFixed(0)}%): ${data.fifo_breakdown.ending_wip.units} × ${(data.physical_flow.ending_wip > 0 ? (data.valuation.ending_wip_conversion / data.cost_per_eu.conversion / data.physical_flow.ending_wip) : 0).toFixed(2)} × €${data.cost_per_eu.conversion.toFixed(4)} = €${data.fifo_breakdown.ending_wip.cc.toFixed(2)}</div>
                 <div class="allocation-detail" style="font-weight: 600; color: #ff9800; margin-top: 10px; font-size: 1.1em;">
-                    Total Ending WIP: €${data.fifo_breakdown.ending_wip.total.toFixed(2)}
+                    ${t('totalEndingWIP')}: €${data.fifo_breakdown.ending_wip.total.toFixed(2)}
                 </div>
             </div>
         `;
@@ -440,13 +440,13 @@ function displayWIPResults(data) {
         html += `
             <div class="detail-section">
                 <h4>🎯 Valutazione Finale</h4>
-                <div class="allocation-detail"><strong>Finished Goods (Completed Units):</strong></div>
+                <div class="allocation-detail"><strong>${t('finishedGoods')} (${t('completed')} ${t('units')}):</strong></div>
                 <div class="allocation-detail">€${data.valuation.finished_goods.toFixed(2)}</div>
-                <div class="allocation-detail" style="margin-top: 15px;"><strong>Ending WIP:</strong></div>
-                <div class="allocation-detail">Materials: €${data.valuation.ending_wip_materials.toFixed(2)}</div>
+                <div class="allocation-detail" style="margin-top: 15px;"><strong>${t('endingWIP')}:</strong></div>
+                <div class="allocation-detail">${t('materials')}: €${data.valuation.ending_wip_materials.toFixed(2)}</div>
                 <div class="allocation-detail">Conversion: €${data.valuation.ending_wip_conversion.toFixed(2)}</div>
                 <div class="allocation-detail" style="font-weight: 600; color: #667eea; margin-top: 10px;">
-                    Total Ending WIP: €${data.valuation.ending_wip_total.toFixed(2)}
+                    ${t('totalEndingWIP')}: €${data.valuation.ending_wip_total.toFixed(2)}
                 </div>
             </div>
         `;
@@ -454,7 +454,7 @@ function displayWIPResults(data) {
     
     html += `
         <div class="total-banner">
-            FINISHED GOODS: €${data.valuation.finished_goods.toFixed(2)} | ENDING WIP: €${data.valuation.ending_wip_total.toFixed(2)} | TOTAL: €${data.total_costs.toFixed(2)}
+            ${t('finishedGoods').toUpperCase()}: €${data.valuation.finished_goods.toFixed(2)} | ${t('endingWIP').toUpperCase()}: €${data.valuation.ending_wip_total.toFixed(2)} | TOTAL: €${data.total_costs.toFixed(2)}
         </div>
     `;
     
