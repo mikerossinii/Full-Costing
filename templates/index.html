@@ -150,6 +150,11 @@
             
             .dept-setup {
                 grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .dept-list {
+                width: 100%;
             }
             
             .primary-costs {
@@ -262,6 +267,13 @@
             color: #333;
             margin-bottom: 10px;
             font-size: 2em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        h1::before {
+            font-size: 1.2em;
         }
         
         .subtitle {
@@ -585,7 +597,7 @@
         <!-- Reciprocal Method Page -->
         <div id="reciprocal-page" class="page active">
             <div class="container">
-                <h1>🔄 <span data-i18n="reciprocalTitle">Reciprocal Method</span></h1>
+                <h1><span style="font-size: 1.2em;">🔄</span> <span data-i18n="reciprocalTitle">Reciprocal Method</span></h1>
                 <p class="subtitle" data-i18n="reciprocalSubtitle">Risoluzione di esercizi con Simultaneous Equations</p>
                 
                 <div class="section">
@@ -645,7 +657,7 @@
         <!-- WIP Valuation Page -->
         <div id="wip-page" class="page">
             <div class="container">
-                <h1>📦 <span data-i18n="wipTitle">WIP Valuation</span></h1>
+                <h1><span style="font-size: 1.2em;">📦</span> <span data-i18n="wipTitle">WIP Valuation</span></h1>
                 <p class="subtitle" data-i18n="wipSubtitle">Calcolo della valutazione del Work in Process</p>
                 
                 <div class="section">
