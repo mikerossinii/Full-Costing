@@ -476,6 +476,155 @@ function displayWIPResults(data) {
 // ============================================================================
 
 let lastBreakEvenResults = null;
+let breakEvenChart = null;
+
+function updateBreakEvenChart() {
+    const sellingPrice = parseFloat(document.getElementById('beSellingPrice').value) || 0;
+    const variableCost = parseFloat(document.getElementById('beVariableCost').value) || 0;
+    const fixedCosts = parseFloat(document.getElementById('beFixedCosts').value) || 0;
+    const expectedSales = parseFloat(document.getElementById('beExpectedSales').value) || 0;
+    
+    if (sellingPrice <= 0 || variableCost < 0 || fixedCosts < 0) return;
+    
+    const contributionMargin = sellingPrice - variableCost;
+    if (contributionMargin <= 0) return;
+    
+    const breakEvenUnits = fixedCosts / contributionMargin;
+    
+    // Generate data points for the chart
+    const maxUnits = Math.max(breakEvenUnits * 2, expectedSales * 1.2, 100);
+    const dataPoints = [];
+    const step = maxUnits / 50;
+    
+    for (let units = 0; units <= maxUnits; units += step) {
+        const revenue = units * sellingPrice;
+        const totalCost = fixedCosts + (units * variableCost);
+        dataPoints.push({
+            units: Math.round(units),
+            revenue: revenue,
+            totalCost: totalCost,
+            profit: revenue - totalCost
+        });
+    }
+    
+    // Create or update chart
+    const ctx = document.getElementById('breakEvenChart');
+    if (!ctx) return;
+    
+    if (breakEvenChart) {
+        breakEvenChart.destroy();
+    }
+    
+    breakEvenChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dataPoints.map(d => d.units),
+            datasets: [
+                {
+                    label: t('revenue') || 'Revenue',
+                    data: dataPoints.map(d => d.revenue),
+                    borderColor: '#4caf50',
+                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.1,
+                    fill: false
+                },
+                {
+                    label: t('totalCost') || 'Total Cost',
+                    data: dataPoints.map(d => d.totalCost),
+                    borderColor: '#f44336',
+                    backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.1,
+                    fill: false
+                },
+                {
+                    label: t('fixedCosts') || 'Fixed Costs',
+                    data: dataPoints.map(() => fixedCosts),
+                    borderColor: '#ff9800',
+                    backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    tension: 0,
+                    fill: false
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            aspectRatio: 2,
+            plugins: {
+                title: {
+                    display: true,
+                    text: t('breakEvenChart') || 'Break-Even Analysis',
+                    font: { size: 16, weight: 'bold' }
+                },
+                legend: {
+                    display: true,
+                    position: 'top'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': €' + context.parsed.y.toFixed(2);
+                        }
+                    }
+                },
+                annotation: {
+                    annotations: {
+                        breakEvenLine: {
+                            type: 'line',
+                            xMin: breakEvenUnits,
+                            xMax: breakEvenUnits,
+                            borderColor: '#667eea',
+                            borderWidth: 3,
+                            borderDash: [10, 5],
+                            label: {
+                                display: true,
+                                content: 'Break-Even: ' + Math.ceil(breakEvenUnits) + ' units',
+                                position: 'start',
+                                backgroundColor: '#667eea',
+                                color: 'white',
+                                font: { weight: 'bold' }
+                            }
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: t('units') || 'Units',
+                        font: { weight: 'bold' }
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return Math.round(value);
+                        }
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: '€',
+                        font: { weight: 'bold' }
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return '€' + value.toLocaleString();
+                        }
+                    }
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            }
+        }
+    });
+}
 
 function calculateBreakEven() {
     const productName = document.getElementById('beProductName').value;
@@ -484,6 +633,9 @@ function calculateBreakEven() {
     const fixedCosts = parseFloat(document.getElementById('beFixedCosts').value);
     const targetProfit = parseFloat(document.getElementById('beTargetProfit').value) || 0;
     const expectedSales = parseFloat(document.getElementById('beExpectedSales').value) || 0;
+    
+    // Update chart
+    updateBreakEvenChart();
     
     // Calculate contribution margin
     const contributionMargin = sellingPrice - variableCost;
@@ -606,6 +758,13 @@ function displayBreakEvenResults(data) {
 // Initialize
 init();
 
+// Initialize break-even chart when page loads
+setTimeout(() => {
+    if (document.getElementById('breakEvenChart')) {
+        updateBreakEvenChart();
+    }
+}, 500);
+
 // Listen for language changes
 window.addEventListener('languageChanged', () => {
     // Regenerate reciprocal results if they exist
@@ -626,5 +785,10 @@ window.addEventListener('languageChanged', () => {
     // Regenerate Break-Even results if they exist
     if (lastBreakEvenResults) {
         displayBreakEvenResults(lastBreakEvenResults);
+    }
+    
+    // Update break-even chart with new language
+    if (breakEvenChart) {
+        updateBreakEvenChart();
     }
 });

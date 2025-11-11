@@ -6,6 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Cost Accounting Tools</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -766,11 +767,11 @@
                     <div class="wip-grid">
                         <div class="cost-input">
                             <label data-i18n="productName">Nome Prodotto</label>
-                            <input type="text" id="beProductName" value="Product A" placeholder="es. Product A">
+                            <input type="text" id="beProductName" value="Product A" placeholder="es. Product A" oninput="updateBreakEvenChart()">
                         </div>
                         <div class="cost-input">
                             <label data-i18n="sellingPrice">Prezzo di Vendita (€)</label>
-                            <input type="number" id="beSellingPrice" value="100" step="0.01">
+                            <input type="number" id="beSellingPrice" value="100" step="0.01" oninput="updateBreakEvenChart()">
                         </div>
                     </div>
                 </div>
@@ -780,7 +781,7 @@
                     <div class="wip-grid">
                         <div class="cost-input">
                             <label data-i18n="variableCostPerUnit">Costo Variabile per Unità (€)</label>
-                            <input type="number" id="beVariableCost" value="60" step="0.01">
+                            <input type="number" id="beVariableCost" value="60" step="0.01" oninput="updateBreakEvenChart()">
                         </div>
                         <div class="cost-input">
                             <label data-i18n="variableCostBreakdown">Dettaglio (opzionale)</label>
@@ -794,7 +795,7 @@
                     <div class="wip-grid">
                         <div class="cost-input">
                             <label data-i18n="totalFixedCosts">Costi Fissi Totali (€)</label>
-                            <input type="number" id="beFixedCosts" value="50000" step="0.01">
+                            <input type="number" id="beFixedCosts" value="50000" step="0.01" oninput="updateBreakEvenChart()">
                         </div>
                         <div class="cost-input">
                             <label data-i18n="fixedCostBreakdown">Dettaglio (opzionale)</label>
@@ -808,12 +809,20 @@
                     <div class="wip-grid">
                         <div class="cost-input">
                             <label data-i18n="targetProfit">Profitto Target (€)</label>
-                            <input type="number" id="beTargetProfit" value="20000" step="0.01">
+                            <input type="number" id="beTargetProfit" value="20000" step="0.01" oninput="updateBreakEvenChart()">
                         </div>
                         <div class="cost-input">
                             <label data-i18n="expectedSales">Vendite Previste (unità)</label>
-                            <input type="number" id="beExpectedSales" value="2000" step="1">
+                            <input type="number" id="beExpectedSales" value="2000" step="1" oninput="updateBreakEvenChart()">
                         </div>
+                    </div>
+                </div>
+                
+                <!-- Break-Even Chart -->
+                <div class="section">
+                    <div class="section-title">📈 <span data-i18n="breakEvenChart">Grafico Break-Even</span></div>
+                    <div style="background: white; padding: 20px; border-radius: 10px;">
+                        <canvas id="breakEvenChart"></canvas>
                     </div>
                 </div>
                 

@@ -100,7 +100,10 @@ const translations = {
         unitsForTarget: "Unità per Profitto Target",
         marginOfSafety: "Margine di Sicurezza",
         marginOfSafetyPercent: "Margine di Sicurezza %",
-        operatingLeverage: "Leva Operativa"
+        operatingLeverage: "Leva Operativa",
+        breakEvenChart: "Grafico Break-Even",
+        revenue: "Ricavi",
+        totalCost: "Costo Totale"
     },
     
     en: {
@@ -200,7 +203,10 @@ const translations = {
         unitsForTarget: "Units for Target Profit",
         marginOfSafety: "Margin of Safety",
         marginOfSafetyPercent: "Margin of Safety %",
-        operatingLeverage: "Operating Leverage"
+        operatingLeverage: "Operating Leverage",
+        breakEvenChart: "Break-Even Chart",
+        revenue: "Revenue",
+        totalCost: "Total Cost"
     },
     
     fr: {
