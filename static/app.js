@@ -812,19 +812,19 @@ function updateSensitivity() {
     // Interpretation
     let interpretation = '';
     if (Math.abs(bepChange) < 1) {
-        interpretation = t('sensitivityLow') || 'Impatto minimo sul break-even point';
+        interpretation = t('sensitivityLow');
     } else if (Math.abs(bepChange) < 10) {
-        interpretation = t('sensitivityModerate') || 'Impatto moderato sul break-even point';
+        interpretation = t('sensitivityModerate');
     } else if (Math.abs(bepChange) < 25) {
-        interpretation = t('sensitivityHigh') || 'Impatto significativo sul break-even point';
+        interpretation = t('sensitivityHigh');
     } else {
-        interpretation = t('sensitivityVeryHigh') || 'Impatto molto elevato sul break-even point';
+        interpretation = t('sensitivityVeryHigh');
     }
     
     if (bepChange > 0) {
-        interpretation += '. ' + (t('bepIncreased') || 'Il punto di pareggio è aumentato, servono più vendite.');
+        interpretation += '. ' + t('bepIncreased') + '.';
     } else if (bepChange < 0) {
-        interpretation += '. ' + (t('bepDecreased') || 'Il punto di pareggio è diminuito, servono meno vendite.');
+        interpretation += '. ' + t('bepDecreased') + '.';
     }
     
     // Display results in table
@@ -833,18 +833,18 @@ function updateSensitivity() {
             <table style="width: 100%; background: white; border-radius: 8px; overflow: hidden;">
                 <thead>
                     <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                        <th style="padding: 12px; text-align: left;">Scenario</th>
-                        <th style="padding: 12px; text-align: right;">Fixed Costs</th>
-                        <th style="padding: 12px; text-align: right;">Variable Cost</th>
-                        <th style="padding: 12px; text-align: right;">Price</th>
-                        <th style="padding: 12px; text-align: right;">Contribution Margin</th>
-                        <th style="padding: 12px; text-align: right;">BEP (Units)</th>
-                        <th style="padding: 12px; text-align: right;">BEP (Revenue)</th>
+                        <th style="padding: 12px; text-align: left;">${t('scenario') || 'Scenario'}</th>
+                        <th style="padding: 12px; text-align: right;">${t('fixedCosts')}</th>
+                        <th style="padding: 12px; text-align: right;">${t('variableCostPerUnit')}</th>
+                        <th style="padding: 12px; text-align: right;">${t('sellingPrice')}</th>
+                        <th style="padding: 12px; text-align: right;">${t('contributionMargin')}</th>
+                        <th style="padding: 12px; text-align: right;">BEP (${t('units')})</th>
+                        <th style="padding: 12px; text-align: right;">BEP (${t('revenue')})</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr style="background: #f8f9fa;">
-                        <td style="padding: 12px; font-weight: 600;">Base</td>
+                        <td style="padding: 12px; font-weight: 600;">${t('baseScenario') || 'Base'}</td>
                         <td style="padding: 12px; text-align: right;">€${baseScenario.fixedCosts.toFixed(2)}</td>
                         <td style="padding: 12px; text-align: right;">€${baseScenario.variableCost.toFixed(2)}</td>
                         <td style="padding: 12px; text-align: right;">€${baseScenario.sellingPrice.toFixed(2)}</td>
@@ -853,7 +853,7 @@ function updateSensitivity() {
                         <td style="padding: 12px; text-align: right;">€${baseScenario.breakEvenRevenue.toFixed(2)}</td>
                     </tr>
                     <tr style="background: white;">
-                        <td style="padding: 12px; font-weight: 600; color: #667eea;">New Scenario</td>
+                        <td style="padding: 12px; font-weight: 600; color: #667eea;">${t('newScenario') || 'New'}</td>
                         <td style="padding: 12px; text-align: right; color: ${fcChange !== 0 ? '#667eea' : 'inherit'}; font-weight: ${fcChange !== 0 ? '600' : 'normal'};">
                             €${newFixedCosts.toFixed(2)}
                             ${fcChange !== 0 ? '<br><small style="color: ' + (fcChange > 0 ? '#f44336' : '#4caf50') + ';">(' + (fcChange > 0 ? '+' : '') + fcChange + '%)</small>' : ''}
@@ -881,7 +881,7 @@ function updateSensitivity() {
         </div>
         
         <div class="detail-section" style="margin-top: 20px; background: #e3f2fd; border-left-color: #2196f3;">
-            <h4>📊 ${t('interpretation') || 'Interpretazione'}</h4>
+            <h4>📊 ${t('interpretation')}</h4>
             <div class="allocation-detail" style="font-size: 1.05em; line-height: 1.6;">
                 ${interpretation}
             </div>
@@ -926,5 +926,10 @@ window.addEventListener('languageChanged', () => {
     // Update break-even chart with new language
     if (breakEvenChart) {
         updateBreakEvenChart();
+    }
+    
+    // Update sensitivity analysis with new language
+    if (baseScenario && document.getElementById('sensitivitySection').style.display !== 'none') {
+        updateSensitivity();
     }
 });

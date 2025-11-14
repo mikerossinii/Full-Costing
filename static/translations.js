@@ -116,7 +116,10 @@ const translations = {
         sensitivityHigh: "Impatto significativo sul break-even point",
         sensitivityVeryHigh: "Impatto molto elevato sul break-even point",
         bepIncreased: "Il punto di pareggio è aumentato, servono più vendite",
-        bepDecreased: "Il punto di pareggio è diminuito, servono meno vendite"
+        bepDecreased: "Il punto di pareggio è diminuito, servono meno vendite",
+        scenario: "Scenario",
+        baseScenario: "Base",
+        newScenario: "Nuovo"
     },
     
     en: {
@@ -221,7 +224,21 @@ const translations = {
         revenue: "Revenue",
         totalCost: "Total Cost",
         exportPDF: "Export PDF",
-        exportExcel: "Export Excel"
+        exportExcel: "Export Excel",
+        sensitivityAnalysis: "Sensitivity Analysis",
+        fixedCostsChange: "Fixed Costs Change (%)",
+        variableCostsChange: "Variable Costs Change (%)",
+        priceChange: "Price Change (%)",
+        interpretation: "Interpretation",
+        sensitivityLow: "Minimal impact on break-even point",
+        sensitivityModerate: "Moderate impact on break-even point",
+        sensitivityHigh: "Significant impact on break-even point",
+        sensitivityVeryHigh: "Very high impact on break-even point",
+        bepIncreased: "Break-even point increased, more sales needed",
+        bepDecreased: "Break-even point decreased, fewer sales needed",
+        scenario: "Scenario",
+        baseScenario: "Base",
+        newScenario: "New"
     },
     
     fr: {
@@ -326,7 +343,18 @@ const translations = {
         revenue: "Chiffre d'Affaires",
         totalCost: "Coût Total",
         exportPDF: "Exporter PDF",
-        exportExcel: "Exporter Excel"
+        exportExcel: "Exporter Excel",
+        sensitivityAnalysis: "Analyse de Sensibilité",
+        fixedCostsChange: "Variation Coûts Fixes (%)",
+        variableCostsChange: "Variation Coûts Variables (%)",
+        priceChange: "Variation Prix (%)",
+        interpretation: "Interprétation",
+        sensitivityLow: "Impact minimal sur le seuil de rentabilité",
+        sensitivityModerate: "Impact modéré sur le seuil de rentabilité",
+        sensitivityHigh: "Impact significatif sur le seuil de rentabilité",
+        sensitivityVeryHigh: "Impact très élevé sur le seuil de rentabilité",
+        bepIncreased: "Le seuil de rentabilité a augmenté, plus de ventes nécessaires",
+        bepDecreased: "Le seuil de rentabilité a diminué, moins de ventes nécessaires"
     },
     
     es: {
@@ -431,7 +459,18 @@ const translations = {
         revenue: "Ingresos",
         totalCost: "Costo Total",
         exportPDF: "Exportar PDF",
-        exportExcel: "Exportar Excel"
+        exportExcel: "Exportar Excel",
+        sensitivityAnalysis: "Análisis de Sensibilidad",
+        fixedCostsChange: "Cambio Costos Fijos (%)",
+        variableCostsChange: "Cambio Costos Variables (%)",
+        priceChange: "Cambio Precio (%)",
+        interpretation: "Interpretación",
+        sensitivityLow: "Impacto mínimo en el punto de equilibrio",
+        sensitivityModerate: "Impacto moderado en el punto de equilibrio",
+        sensitivityHigh: "Impacto significativo en el punto de equilibrio",
+        sensitivityVeryHigh: "Impacto muy elevado en el punto de equilibrio",
+        bepIncreased: "El punto de equilibrio aumentó, se necesitan más ventas",
+        bepDecreased: "El punto de equilibrio disminuyó, se necesitan menos ventas"
     },
     
     ca: {
@@ -536,7 +575,18 @@ const translations = {
         revenue: "Ingressos",
         totalCost: "Cost Total",
         exportPDF: "Exportar PDF",
-        exportExcel: "Exportar Excel"
+        exportExcel: "Exportar Excel",
+        sensitivityAnalysis: "Anàlisi de Sensibilitat",
+        fixedCostsChange: "Canvi Costos Fixos (%)",
+        variableCostsChange: "Canvi Costos Variables (%)",
+        priceChange: "Canvi Preu (%)",
+        interpretation: "Interpretació",
+        sensitivityLow: "Impacte mínim en el punt d'equilibri",
+        sensitivityModerate: "Impacte moderat en el punt d'equilibri",
+        sensitivityHigh: "Impacte significatiu en el punt d'equilibri",
+        sensitivityVeryHigh: "Impacte molt elevat en el punt d'equilibri",
+        bepIncreased: "El punt d'equilibri ha augmentat, es necessiten més vendes",
+        bepDecreased: "El punt d'equilibri ha disminuït, es necessiten menys vendes"
     }
 };
 
