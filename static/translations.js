@@ -119,7 +119,13 @@ const translations = {
         bepDecreased: "Il punto di pareggio è diminuito, servono meno vendite",
         scenario: "Scenario",
         baseScenario: "Base",
-        newScenario: "Nuovo"
+        newScenario: "Nuovo",
+        mosImproved: "Il margine di sicurezza è migliorato significativamente. L'azienda ha più cuscinetto prima di andare in perdita",
+        mosSlightlyImproved: "Il margine di sicurezza è leggermente migliorato",
+        mosSlightlyWorse: "Il margine di sicurezza è leggermente peggiorato",
+        mosWorse: "Il margine di sicurezza è peggiorato significativamente. L'azienda è più vicina al punto di pareggio e quindi più a rischio",
+        mosWarning: "Attenzione: margine molto basso!",
+        mosGood: "Margine di sicurezza confortevole"
     },
     
     en: {
@@ -238,7 +244,13 @@ const translations = {
         bepDecreased: "Break-even point decreased, fewer sales needed",
         scenario: "Scenario",
         baseScenario: "Base",
-        newScenario: "New"
+        newScenario: "New",
+        mosImproved: "Margin of safety improved significantly. The company has more cushion before breaking even",
+        mosSlightlyImproved: "Margin of safety slightly improved",
+        mosSlightlyWorse: "Margin of safety slightly worse",
+        mosWorse: "Margin of safety worsened significantly. The company is closer to break-even and therefore more at risk",
+        mosWarning: "Warning: very low margin!",
+        mosGood: "Comfortable margin of safety"
     },
     
     fr: {

@@ -805,6 +805,20 @@ function updateSensitivity() {
     const newBreakEvenUnits = newFixedCosts / newContributionMargin;
     const newBreakEvenRevenue = newBreakEvenUnits * newSellingPrice;
     
+    // Calculate margin of safety if expected sales exist
+    let newMarginOfSafety = 0;
+    let newMarginOfSafetyPercent = 0;
+    let mosChange = 0;
+    
+    if (baseScenario.expectedSales > 0) {
+        newMarginOfSafety = baseScenario.expectedSales - newBreakEvenUnits;
+        newMarginOfSafetyPercent = (newMarginOfSafety / baseScenario.expectedSales) * 100;
+        
+        if (baseScenario.marginOfSafety > 0) {
+            mosChange = ((newMarginOfSafety - baseScenario.marginOfSafety) / baseScenario.marginOfSafety * 100);
+        }
+    }
+    
     // Calculate changes
     const bepChange = ((newBreakEvenUnits - baseScenario.breakEvenUnits) / baseScenario.breakEvenUnits * 100);
     const cmChange = ((newContributionMargin - baseScenario.contributionMargin) / baseScenario.contributionMargin * 100);
@@ -827,6 +841,26 @@ function updateSensitivity() {
         interpretation += '. ' + t('bepDecreased') + '.';
     }
     
+    // Add margin of safety interpretation if applicable
+    if (baseScenario.expectedSales > 0) {
+        interpretation += '<br><br><strong>' + t('marginOfSafety') + ':</strong> ';
+        if (mosChange > 10) {
+            interpretation += t('mosImproved') || 'Il margine di sicurezza è migliorato significativamente. L\'azienda ha più cuscinetto prima di andare in perdita.';
+        } else if (mosChange > 0) {
+            interpretation += t('mosSlightlyImproved') || 'Il margine di sicurezza è leggermente migliorato.';
+        } else if (mosChange > -10) {
+            interpretation += t('mosSlightlyWorse') || 'Il margine di sicurezza è leggermente peggiorato.';
+        } else {
+            interpretation += t('mosWorse') || 'Il margine di sicurezza è peggiorato significativamente. L\'azienda è più vicina al punto di pareggio e quindi più a rischio.';
+        }
+        
+        if (newMarginOfSafetyPercent < 10) {
+            interpretation += ' ⚠️ ' + (t('mosWarning') || 'Attenzione: margine molto basso!');
+        } else if (newMarginOfSafetyPercent > 30) {
+            interpretation += ' ✅ ' + (t('mosGood') || 'Margine di sicurezza confortevole.');
+        }
+    }
+    
     // Display results in table
     const html = `
         <div style="overflow-x: auto;">
@@ -839,7 +873,7 @@ function updateSensitivity() {
                         <th style="padding: 12px; text-align: right;">${t('sellingPrice')}</th>
                         <th style="padding: 12px; text-align: right;">${t('contributionMargin')}</th>
                         <th style="padding: 12px; text-align: right;">BEP (${t('units')})</th>
-                        <th style="padding: 12px; text-align: right;">BEP (${t('revenue')})</th>
+                        ${baseScenario.expectedSales > 0 ? `<th style="padding: 12px; text-align: right;">${t('marginOfSafety')}</th>` : ''}
                     </tr>
                 </thead>
                 <tbody>
@@ -850,7 +884,7 @@ function updateSensitivity() {
                         <td style="padding: 12px; text-align: right;">€${baseScenario.sellingPrice.toFixed(2)}</td>
                         <td style="padding: 12px; text-align: right;">€${baseScenario.contributionMargin.toFixed(2)}</td>
                         <td style="padding: 12px; text-align: right;">${Math.ceil(baseScenario.breakEvenUnits)}</td>
-                        <td style="padding: 12px; text-align: right;">€${baseScenario.breakEvenRevenue.toFixed(2)}</td>
+                        ${baseScenario.expectedSales > 0 ? `<td style="padding: 12px; text-align: right;">${baseScenario.marginOfSafety.toFixed(0)} (${baseScenario.marginOfSafetyPercent.toFixed(1)}%)</td>` : ''}
                     </tr>
                     <tr style="background: white;">
                         <td style="padding: 12px; font-weight: 600; color: #667eea;">${t('newScenario') || 'New'}</td>
@@ -874,7 +908,11 @@ function updateSensitivity() {
                             ${Math.ceil(newBreakEvenUnits)}
                             <br><small style="color: ${bepChange < 0 ? '#4caf50' : '#f44336'};">(${bepChange > 0 ? '+' : ''}${bepChange.toFixed(1)}%)</small>
                         </td>
-                        <td style="padding: 12px; text-align: right; font-weight: 600;">€${newBreakEvenRevenue.toFixed(2)}</td>
+                        ${baseScenario.expectedSales > 0 ? `
+                        <td style="padding: 12px; text-align: right; font-weight: 600;">
+                            ${newMarginOfSafety.toFixed(0)} (${newMarginOfSafetyPercent.toFixed(1)}%)
+                            <br><small style="color: ${mosChange > 0 ? '#4caf50' : '#f44336'};">(${mosChange > 0 ? '+' : ''}${mosChange.toFixed(1)}%)</small>
+                        </td>` : ''}
                     </tr>
                 </tbody>
             </table>
