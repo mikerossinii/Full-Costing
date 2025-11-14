@@ -260,7 +260,17 @@ const translations = {
         mosSlightlyWorse: "Margin of safety slightly worse",
         mosWorse: "Margin of safety worsened significantly. The company is closer to break-even and therefore more at risk",
         mosWarning: "Warning: very low margin!",
-        mosGood: "Comfortable margin of safety"
+        mosGood: "Comfortable margin of safety",
+        showProcedimento: "Show Procedure",
+        procedimento: "Calculation Procedure",
+        setupSystem: "System Setup",
+        reciprocalExplanation: "The reciprocal method solves a system of simultaneous equations to allocate support department costs, considering reciprocal services between them",
+        simultaneousEquations: "Simultaneous Equations",
+        systemSolution: "System Solution",
+        allocationToProduction: "Allocation to Production Departments",
+        inputData: "Input Data",
+        finalValuation: "Final Valuation",
+        valuation: "Valuation"
     },
     
     fr: {
@@ -376,7 +386,26 @@ const translations = {
         sensitivityHigh: "Impact significatif sur le seuil de rentabilité",
         sensitivityVeryHigh: "Impact très élevé sur le seuil de rentabilité",
         bepIncreased: "Le seuil de rentabilité a augmenté, plus de ventes nécessaires",
-        bepDecreased: "Le seuil de rentabilité a diminué, moins de ventes nécessaires"
+        bepDecreased: "Le seuil de rentabilité a diminué, moins de ventes nécessaires",
+        scenario: "Scénario",
+        baseScenario: "Base",
+        newScenario: "Nouveau",
+        mosImproved: "La marge de sécurité s'est améliorée de manière significative. L'entreprise a plus de coussin avant d'atteindre le seuil",
+        mosSlightlyImproved: "La marge de sécurité s'est légèrement améliorée",
+        mosSlightlyWorse: "La marge de sécurité s'est légèrement détériorée",
+        mosWorse: "La marge de sécurité s'est considérablement détériorée. L'entreprise est plus proche du seuil et donc plus à risque",
+        mosWarning: "Attention: marge très faible!",
+        mosGood: "Marge de sécurité confortable",
+        showProcedimento: "Afficher la Procédure",
+        procedimento: "Procédure de Calcul",
+        setupSystem: "Configuration du Système",
+        reciprocalExplanation: "La méthode réciproque résout un système d'équations simultanées pour allouer les coûts des départements de support, en tenant compte des services réciproques entre eux",
+        simultaneousEquations: "Équations Simultanées",
+        systemSolution: "Solution du Système",
+        allocationToProduction: "Allocation aux Départements de Production",
+        inputData: "Données d'Entrée",
+        finalValuation: "Évaluation Finale",
+        valuation: "Évaluation"
     },
     
     es: {
@@ -492,7 +521,26 @@ const translations = {
         sensitivityHigh: "Impacto significativo en el punto de equilibrio",
         sensitivityVeryHigh: "Impacto muy elevado en el punto de equilibrio",
         bepIncreased: "El punto de equilibrio aumentó, se necesitan más ventas",
-        bepDecreased: "El punto de equilibrio disminuyó, se necesitan menos ventas"
+        bepDecreased: "El punto de equilibrio disminuyó, se necesitan menos ventas",
+        scenario: "Escenario",
+        baseScenario: "Base",
+        newScenario: "Nuevo",
+        mosImproved: "El margen de seguridad mejoró significativamente. La empresa tiene más colchón antes de llegar al punto de equilibrio",
+        mosSlightlyImproved: "El margen de seguridad mejoró ligeramente",
+        mosSlightlyWorse: "El margen de seguridad empeoró ligeramente",
+        mosWorse: "El margen de seguridad empeoró significativamente. La empresa está más cerca del punto de equilibrio y por lo tanto más en riesgo",
+        mosWarning: "Advertencia: margen muy bajo!",
+        mosGood: "Margen de seguridad confortable",
+        showProcedimento: "Mostrar Procedimiento",
+        procedimento: "Procedimiento de Cálculo",
+        setupSystem: "Configuración del Sistema",
+        reciprocalExplanation: "El método recíproco resuelve un sistema de ecuaciones simultáneas para asignar los costos de los departamentos de soporte, considerando los servicios recíprocos entre ellos",
+        simultaneousEquations: "Ecuaciones Simultáneas",
+        systemSolution: "Solución del Sistema",
+        allocationToProduction: "Asignación a Departamentos de Producción",
+        inputData: "Datos de Entrada",
+        finalValuation: "Valoración Final",
+        valuation: "Valoración"
     },
     
     ca: {
@@ -608,7 +656,26 @@ const translations = {
         sensitivityHigh: "Impacte significatiu en el punt d'equilibri",
         sensitivityVeryHigh: "Impacte molt elevat en el punt d'equilibri",
         bepIncreased: "El punt d'equilibri ha augmentat, es necessiten més vendes",
-        bepDecreased: "El punt d'equilibri ha disminuït, es necessiten menys vendes"
+        bepDecreased: "El punt d'equilibri ha disminuït, es necessiten menys vendes",
+        scenario: "Escenari",
+        baseScenario: "Base",
+        newScenario: "Nou",
+        mosImproved: "El marge de seguretat ha millorat significativament. L'empresa té més coixí abans d'arribar al punt d'equilibri",
+        mosSlightlyImproved: "El marge de seguretat ha millorat lleugerament",
+        mosSlightlyWorse: "El marge de seguretat ha empitjorat lleugerament",
+        mosWorse: "El marge de seguretat ha empitjorat significativament. L'empresa està més a prop del punt d'equilibri i per tant més en risc",
+        mosWarning: "Atenció: marge molt baix!",
+        mosGood: "Marge de seguretat confortable",
+        showProcedimento: "Mostrar Procediment",
+        procedimento: "Procediment de Càlcul",
+        setupSystem: "Configuració del Sistema",
+        reciprocalExplanation: "El mètode recíproc resol un sistema d'equacions simultànies per assignar els costos dels departaments de suport, considerant els serveis recíprocs entre ells",
+        simultaneousEquations: "Equacions Simultànies",
+        systemSolution: "Solució del Sistema",
+        allocationToProduction: "Assignació a Departaments de Producció",
+        inputData: "Dades d'Entrada",
+        finalValuation: "Valoració Final",
+        valuation: "Valoració"
     }
 };
 
