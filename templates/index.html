@@ -474,6 +474,70 @@
             box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
         }
         
+        /* Procedimento Section */
+        .procedimento-toggle {
+            background: #f8f9fa;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1em;
+            margin: 20px auto;
+            display: block;
+            transition: all 0.3s;
+        }
+        
+        .procedimento-toggle:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .procedimento-content {
+            display: none;
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .procedimento-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        .step {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .step-title {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .formula {
+            background: #e3f2fd;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            border-left: 3px solid #2196f3;
+        }
+        
+        .calculation {
+            color: #666;
+            margin: 5px 0;
+            line-height: 1.6;
+        }
+        
         /* Sensitivity Analysis Sliders */
         input[type="range"] {
             width: 100%;

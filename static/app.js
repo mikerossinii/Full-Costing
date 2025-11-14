@@ -313,8 +313,121 @@ function displayReciprocalResults(data, support_depts, production_depts, allocat
     
     document.getElementById('totalBanner').textContent = `${t('totalGeneral').toUpperCase()}: €${data.total.toFixed(6)}`;
     
+    // Add procedimento section
+    const procedimentoHTML = generateReciprocalProcedimento(data, support_depts, production_depts);
+    detailsHTML += `
+        <button class="procedimento-toggle" onclick="toggleProcedimento('reciprocal')">
+            📖 <span data-i18n="showProcedimento">${t('showProcedimento') || 'Mostra Procedimento'}</span>
+        </button>
+        <div id="reciprocal-procedimento" class="procedimento-content">
+            ${procedimentoHTML}
+        </div>
+    `;
+    document.getElementById('detailsSection').innerHTML = detailsHTML;
+    
     document.getElementById('reciprocalResults').style.display = 'block';
     document.getElementById('reciprocalResults').scrollIntoView({ behavior: 'smooth' });
+}
+
+function generateReciprocalProcedimento(data, support_depts, production_depts) {
+    let html = `<h3 style="color: #667eea; margin-bottom: 20px;">📚 ${t('procedimento') || 'Procedimento di Calcolo'}</h3>`;
+    
+    // Step 1: Setup
+    html += `
+        <div class="step">
+            <div class="step-title">1️⃣ ${t('setupSystem') || 'Impostazione del Sistema'}</div>
+            <div class="calculation">
+                ${t('reciprocalExplanation') || 'Il metodo reciproco risolve un sistema di equazioni simultanee per allocare i costi dei dipartimenti di supporto, considerando i servizi reciproci tra loro.'}
+            </div>
+        </div>
+    `;
+    
+    // Step 2: Equations
+    html += `
+        <div class="step">
+            <div class="step-title">2️⃣ ${t('simultaneousEquations') || 'Equazioni Simultanee'}</div>
+    `;
+    
+    supportDepts.forEach(dept => {
+        if (data.support_costs[dept]) {
+            html += `<div class="formula">X_${dept} = €${support_depts[dept].toFixed(2)}`;
+            
+            // Add allocations from other support departments
+            supportDepts.forEach(otherDept => {
+                if (otherDept !== dept && data.support_total_units[otherDept] > 0) {
+                    const units = data.production_details[Object.keys(data.production_details)[0]]?.find(d => d.from === otherDept)?.units || 0;
+                    // This is simplified - in reality we'd need the actual service units matrix
+                    html += ` + (proporzione da ${otherDept})`;
+                }
+            });
+            
+            html += `</div>`;
+        }
+    });
+    
+    html += `</div>`;
+    
+    // Step 3: Solution
+    html += `
+        <div class="step">
+            <div class="step-title">3️⃣ ${t('systemSolution') || 'Soluzione del Sistema'}</div>
+    `;
+    
+    supportDepts.forEach(dept => {
+        if (data.support_costs[dept]) {
+            html += `
+                <div class="calculation">
+                    <strong>${dept}:</strong><br>
+                    ${t('directCost')}: €${support_depts[dept].toFixed(6)}<br>
+                    ${t('totalCost')}: €${data.support_costs[dept].toFixed(6)}<br>
+                    ${t('totalUnits')}: ${data.support_total_units[dept]}<br>
+                    ${t('costRate')}: €${data.support_rates[dept].toFixed(6)}/${t('unit')}
+                </div>
+                <div class="formula">
+                    Rate = €${data.support_costs[dept].toFixed(6)} ÷ ${data.support_total_units[dept]} = €${data.support_rates[dept].toFixed(6)}/${t('unit')}
+                </div>
+            `;
+        }
+    });
+    
+    html += `</div>`;
+    
+    // Step 4: Allocation to Production
+    html += `
+        <div class="step">
+            <div class="step-title">4️⃣ ${t('allocationToProduction') || 'Allocazione ai Dipartimenti di Produzione'}</div>
+    `;
+    
+    productionDepts.forEach(dept => {
+        if (data.production_costs[dept]) {
+            html += `
+                <div class="calculation">
+                    <strong>${dept}:</strong><br>
+                    ${t('directCost')}: €${production_depts[dept].toFixed(6)}
+                </div>
+            `;
+            
+            if (data.production_details[dept]) {
+                data.production_details[dept].forEach(detail => {
+                    html += `
+                        <div class="formula">
+                            + ${detail.from}: ${detail.units} ${t('units')} × €${detail.rate.toFixed(6)} = €${detail.allocated.toFixed(6)}
+                        </div>
+                    `;
+                });
+            }
+            
+            html += `
+                <div class="calculation" style="font-weight: 600; color: #4caf50; margin-top: 10px;">
+                    = ${t('total')}: €${data.production_costs[dept].toFixed(6)}
+                </div>
+            `;
+        }
+    });
+    
+    html += `</div>`;
+    
+    return html;
 }
 
 // ============================================================================
@@ -478,9 +591,109 @@ function displayWIPResults(data) {
         </div>
     `;
     
+    // Add procedimento
+    html += `
+        <button class="procedimento-toggle" onclick="toggleProcedimento('wip')">
+            📖 <span data-i18n="showProcedimento">${t('showProcedimento') || 'Mostra Procedimento'}</span>
+        </button>
+        <div id="wip-procedimento" class="procedimento-content">
+            ${generateWIPProcedimento(data)}
+        </div>
+    `;
+    
     document.getElementById('wipResultsContent').innerHTML = html;
     document.getElementById('wipResults').style.display = 'block';
     document.getElementById('wipResults').scrollIntoView({ behavior: 'smooth' });
+}
+
+function generateWIPProcedimento(data) {
+    let html = `<h3 style="color: #667eea; margin-bottom: 20px;">📚 ${t('procedimento') || 'Procedimento di Calcolo'}</h3>`;
+    
+    // Step 1: Physical Flow
+    html += `
+        <div class="step">
+            <div class="step-title">1️⃣ ${t('physicalFlow')}</div>
+            <div class="calculation">
+                ${t('openingWIPLabel')}: ${data.physical_flow.opening_wip} ${t('units')}<br>
+                ${t('started')}: ${data.physical_flow.started} ${t('units')}<br>
+                ${t('completed')}: ${data.physical_flow.completed} ${t('units')}
+            </div>
+            <div class="formula">
+                ${t('endingWIP')} = ${data.physical_flow.opening_wip} + ${data.physical_flow.started} - ${data.physical_flow.completed} = ${data.physical_flow.ending_wip} ${t('units')}
+            </div>
+        </div>
+    `;
+    
+    // Step 2: Equivalent Units
+    html += `
+        <div class="step">
+            <div class="step-title">2️⃣ ${t('equivalentUnits')} (${data.method})</div>
+            <div class="calculation">
+                <strong>${t('materials')}:</strong> ${data.equivalent_units.materials.toFixed(2)} EU<br>
+                <strong>${t('conversionCosts')}:</strong> ${data.equivalent_units.conversion.toFixed(2)} EU
+            </div>
+        </div>
+    `;
+    
+    // Step 3: Cost per EU
+    html += `
+        <div class="step">
+            <div class="step-title">3️⃣ ${t('costPerEU')}</div>
+            <div class="formula">
+                ${t('materials')}: Cost ÷ EU = €${data.cost_per_eu.materials.toFixed(4)}/EU
+            </div>
+            <div class="formula">
+                Conversion: Cost ÷ EU = €${data.cost_per_eu.conversion.toFixed(4)}/EU
+            </div>
+            <div class="calculation" style="font-weight: 600; margin-top: 10px;">
+                ${t('total')}: €${data.cost_per_eu.total.toFixed(4)}/EU
+            </div>
+        </div>
+    `;
+    
+    // Step 4: Valuation
+    if (data.method === 'FIFO' && data.fifo_breakdown) {
+        html += `
+            <div class="step">
+                <div class="step-title">4️⃣ ${t('valuation')} - FIFO</div>
+                
+                <div class="calculation"><strong>a) ${t('completingOpeningWIP')}:</strong></div>
+                <div class="formula">
+                    ${t('openingDM')}: €${data.fifo_breakdown.completing_opening.opening_dm.toFixed(2)}<br>
+                    ${t('openingCC')}: €${data.fifo_breakdown.completing_opening.opening_cc.toFixed(2)}<br>
+                    ${t('additionalCC')}: €${data.fifo_breakdown.completing_opening.additional_cc.toFixed(2)}<br>
+                    = €${data.fifo_breakdown.completing_opening.total.toFixed(2)}
+                </div>
+                
+                <div class="calculation"><strong>b) ${t('startedAndCompleted')}:</strong></div>
+                <div class="formula">
+                    ${data.fifo_breakdown.started_and_completed.units} ${t('units')} × €${data.cost_per_eu.total.toFixed(4)} = €${data.fifo_breakdown.started_and_completed.cost.toFixed(2)}
+                </div>
+                
+                <div class="calculation"><strong>c) ${t('endingWIPSection')}:</strong></div>
+                <div class="formula">
+                    DM: €${data.fifo_breakdown.ending_wip.dm.toFixed(2)}<br>
+                    CC: €${data.fifo_breakdown.ending_wip.cc.toFixed(2)}<br>
+                    = €${data.fifo_breakdown.ending_wip.total.toFixed(2)}
+                </div>
+            </div>
+        `;
+    }
+    
+    html += `
+        <div class="step">
+            <div class="step-title">5️⃣ ${t('finalValuation') || 'Valutazione Finale'}</div>
+            <div class="calculation">
+                <strong>${t('finishedGoods')}:</strong> €${data.valuation.finished_goods.toFixed(2)}<br>
+                <strong>${t('endingWIP')}:</strong> €${data.valuation.ending_wip_total.toFixed(2)}
+            </div>
+            <div class="formula">
+                ${t('total')}: €${data.valuation.finished_goods.toFixed(2)} + €${data.valuation.ending_wip_total.toFixed(2)} = €${data.total_costs.toFixed(2)}
+            </div>
+        </div>
+    `;
+    
+    return html;
 }
 
 // ============================================================================
@@ -763,6 +976,13 @@ function displayBreakEvenResults(data) {
         <div class="total-banner">
             ${data.productName.toUpperCase()} | Break-Even: ${Math.ceil(data.breakEvenUnits)} ${t('units')} | €${data.breakEvenRevenue.toFixed(2)}
         </div>
+        
+        <button class="procedimento-toggle" onclick="toggleProcedimento('breakeven')">
+            📖 <span data-i18n="showProcedimento">${t('showProcedimento') || 'Mostra Procedimento'}</span>
+        </button>
+        <div id="breakeven-procedimento" class="procedimento-content">
+            ${generateBreakEvenProcedimento(data)}
+        </div>
     `;
     
     document.getElementById('breakEvenResultsContent').innerHTML = html;
@@ -781,6 +1001,86 @@ function displayBreakEvenResults(data) {
     updateSensitivity();
     
     document.getElementById('breakEvenResults').scrollIntoView({ behavior: 'smooth' });
+}
+
+function generateBreakEvenProcedimento(data) {
+    let html = `<h3 style="color: #667eea; margin-bottom: 20px;">📚 ${t('procedimento') || 'Procedimento di Calcolo'}</h3>`;
+    
+    // Step 1: Input Data
+    html += `
+        <div class="step">
+            <div class="step-title">1️⃣ ${t('inputData') || 'Dati di Input'}</div>
+            <div class="calculation">
+                ${t('sellingPrice')}: €${data.sellingPrice.toFixed(2)}<br>
+                ${t('variableCostPerUnit')}: €${data.variableCost.toFixed(2)}<br>
+                ${t('fixedCosts')}: €${data.fixedCosts.toFixed(2)}
+            </div>
+        </div>
+    `;
+    
+    // Step 2: Contribution Margin
+    html += `
+        <div class="step">
+            <div class="step-title">2️⃣ ${t('contributionMargin')}</div>
+            <div class="formula">
+                CM = ${t('sellingPrice')} - ${t('variableCostPerUnit')}<br>
+                CM = €${data.sellingPrice.toFixed(2)} - €${data.variableCost.toFixed(2)} = €${data.contributionMargin.toFixed(2)}
+            </div>
+            <div class="calculation">
+                ${t('contributionMarginRatio')}: (€${data.contributionMargin.toFixed(2)} ÷ €${data.sellingPrice.toFixed(2)}) × 100 = ${data.contributionMarginRatio.toFixed(2)}%
+            </div>
+        </div>
+    `;
+    
+    // Step 3: Break-Even Point
+    html += `
+        <div class="step">
+            <div class="step-title">3️⃣ Break-Even Point</div>
+            <div class="formula">
+                BEP (${t('units')}) = ${t('fixedCosts')} ÷ ${t('contributionMargin')}<br>
+                BEP = €${data.fixedCosts.toFixed(2)} ÷ €${data.contributionMargin.toFixed(2)} = ${data.breakEvenUnits.toFixed(2)} ${t('units')}
+            </div>
+            <div class="formula">
+                BEP (${t('revenue')}) = BEP ${t('units')} × ${t('sellingPrice')}<br>
+                BEP = ${Math.ceil(data.breakEvenUnits)} × €${data.sellingPrice.toFixed(2)} = €${data.breakEvenRevenue.toFixed(2)}
+            </div>
+        </div>
+    `;
+    
+    // Step 4: Target Profit
+    if (data.targetProfit > 0) {
+        html += `
+            <div class="step">
+                <div class="step-title">4️⃣ ${t('unitsForTarget')}</div>
+                <div class="formula">
+                    ${t('units')} = (${t('fixedCosts')} + ${t('targetProfit')}) ÷ ${t('contributionMargin')}<br>
+                    ${t('units')} = (€${data.fixedCosts.toFixed(2)} + €${data.targetProfit.toFixed(2)}) ÷ €${data.contributionMargin.toFixed(2)}<br>
+                    = ${Math.ceil(data.unitsForTarget)} ${t('units')}
+                </div>
+            </div>
+        `;
+    }
+    
+    // Step 5: Margin of Safety
+    if (data.expectedSales > 0) {
+        html += `
+            <div class="step">
+                <div class="step-title">5️⃣ ${t('marginOfSafety')}</div>
+                <div class="formula">
+                    MoS = ${t('expectedSales')} - BEP<br>
+                    MoS = ${data.expectedSales} - ${Math.ceil(data.breakEvenUnits)} = ${data.marginOfSafety.toFixed(0)} ${t('units')}
+                </div>
+                <div class="calculation">
+                    MoS % = (${data.marginOfSafety.toFixed(0)} ÷ ${data.expectedSales}) × 100 = ${data.marginOfSafetyPercent.toFixed(2)}%
+                </div>
+                <div class="formula">
+                    ${t('operatingLeverage')} = ${data.operatingLeverage.toFixed(2)}
+                </div>
+            </div>
+        `;
+    }
+    
+    return html;
 }
 
 function updateSensitivity() {
@@ -927,6 +1227,13 @@ function updateSensitivity() {
     `;
     
     document.getElementById('sensitivityResults').innerHTML = html;
+}
+
+function toggleProcedimento(module) {
+    const element = document.getElementById(module + '-procedimento');
+    if (element) {
+        element.classList.toggle('active');
+    }
 }
 
 // Initialize

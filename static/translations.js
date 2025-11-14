@@ -125,7 +125,17 @@ const translations = {
         mosSlightlyWorse: "Il margine di sicurezza è leggermente peggiorato",
         mosWorse: "Il margine di sicurezza è peggiorato significativamente. L'azienda è più vicina al punto di pareggio e quindi più a rischio",
         mosWarning: "Attenzione: margine molto basso!",
-        mosGood: "Margine di sicurezza confortevole"
+        mosGood: "Margine di sicurezza confortevole",
+        showProcedimento: "Mostra Procedimento",
+        procedimento: "Procedimento di Calcolo",
+        setupSystem: "Impostazione del Sistema",
+        reciprocalExplanation: "Il metodo reciproco risolve un sistema di equazioni simultanee per allocare i costi dei dipartimenti di supporto, considerando i servizi reciproci tra loro",
+        simultaneousEquations: "Equazioni Simultanee",
+        systemSolution: "Soluzione del Sistema",
+        allocationToProduction: "Allocazione ai Dipartimenti di Produzione",
+        inputData: "Dati di Input",
+        finalValuation: "Valutazione Finale",
+        valuation: "Valutazione"
     },
     
     en: {
