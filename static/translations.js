@@ -105,7 +105,18 @@ const translations = {
         revenue: "Ricavi",
         totalCost: "Costo Totale",
         exportPDF: "Esporta PDF",
-        exportExcel: "Esporta Excel"
+        exportExcel: "Esporta Excel",
+        sensitivityAnalysis: "Sensitivity Analysis",
+        fixedCostsChange: "Variazione Costi Fissi (%)",
+        variableCostsChange: "Variazione Costi Variabili (%)",
+        priceChange: "Variazione Prezzo (%)",
+        interpretation: "Interpretazione",
+        sensitivityLow: "Impatto minimo sul break-even point",
+        sensitivityModerate: "Impatto moderato sul break-even point",
+        sensitivityHigh: "Impatto significativo sul break-even point",
+        sensitivityVeryHigh: "Impatto molto elevato sul break-even point",
+        bepIncreased: "Il punto di pareggio è aumentato, servono più vendite",
+        bepDecreased: "Il punto di pareggio è diminuito, servono meno vendite"
     },
     
     en: {

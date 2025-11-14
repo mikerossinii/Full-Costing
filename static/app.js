@@ -221,85 +221,97 @@ function displayReciprocalResults(data, support_depts, production_depts, allocat
     // Save results for language switching
     lastReciprocalResults = { data, support_depts, production_depts, allocation_bases };
     
+    // Display support departments in original order
     let supportHTML = '';
-    Object.entries(data.support_costs).forEach(([dept, cost]) => {
-        const direct = support_depts[dept];
-        const rate = data.support_rates[dept];
-        const units = data.support_total_units[dept];
-        supportHTML += `
-            <div class="result-item">
-                <span><strong>${dept}</strong></span>
-                <span>€${cost.toFixed(2)}</span>
-            </div>
-            <div class="result-item" style="font-size: 0.9em; color: #666;">
-                <span data-i18n="directCost">${t('directCost')}</span>
-                <span>€${direct.toFixed(2)}</span>
-            </div>
-            <div class="result-item" style="font-size: 0.9em; color: #666;">
-                <span data-i18n="totalUnits">${t('totalUnits')}</span>
-                <span>${units.toFixed(0)}</span>
-            </div>
-            <div class="result-item" style="font-size: 0.9em; color: #667eea; margin-bottom: 15px;">
-                <span data-i18n="costRate">${t('costRate')}</span>
-                <span>€${rate.toFixed(4)}/${t('unit')}</span>
-            </div>
-        `;
-    });
-    document.getElementById('supportResults').innerHTML = supportHTML;
-    
-    let productionHTML = '';
-    Object.entries(data.production_costs).forEach(([dept, cost]) => {
-        const direct = production_depts[dept];
-        productionHTML += `
-            <div class="result-item">
-                <span><strong>${dept}</strong></span>
-                <span>€${cost.toFixed(2)}</span>
-            </div>
-            <div class="result-item" style="font-size: 0.9em; color: #666;">
-                <span data-i18n="directCost">${t('directCost')}</span>
-                <span>€${direct.toFixed(2)}</span>
-            </div>
-            <div class="result-item" style="font-size: 0.9em; color: #666; margin-bottom: 15px;">
-                <span data-i18n="allocated">${t('allocated')}</span>
-                <span>€${(cost - direct).toFixed(2)}</span>
-            </div>
-        `;
-        
-        if (data.production_rates[dept]) {
-            productionHTML += `
+    supportDepts.forEach(dept => {
+        if (data.support_costs[dept]) {
+            const cost = data.support_costs[dept];
+            const direct = support_depts[dept];
+            const rate = data.support_rates[dept];
+            const units = data.support_total_units[dept];
+            supportHTML += `
+                <div class="result-item">
+                    <span><strong>${dept}</strong></span>
+                    <span>€${cost.toFixed(6)}</span>
+                </div>
+                <div class="result-item" style="font-size: 0.9em; color: #666;">
+                    <span data-i18n="directCost">${t('directCost')}</span>
+                    <span>€${direct.toFixed(6)}</span>
+                </div>
+                <div class="result-item" style="font-size: 0.9em; color: #666;">
+                    <span data-i18n="totalUnits">${t('totalUnits')}</span>
+                    <span>${units.toFixed(0)}</span>
+                </div>
                 <div class="result-item" style="font-size: 0.9em; color: #667eea; margin-bottom: 15px;">
                     <span data-i18n="costRate">${t('costRate')}</span>
-                    <span>€${data.production_rates[dept].toFixed(4)}/w.u</span>
+                    <span>€${rate.toFixed(6)}/${t('unit')}</span>
                 </div>
             `;
         }
     });
-    document.getElementById('productionResults').innerHTML = productionHTML;
+    document.getElementById('supportResults').innerHTML = supportHTML;
     
-    let detailsHTML = '';
-    Object.entries(data.production_details).forEach(([dept, details]) => {
-        detailsHTML += `
-            <div class="detail-section">
-                <h4>${dept} - ${t('allocationDetails')}</h4>
-                <div class="allocation-detail">${t('directCost')}: €${production_depts[dept].toFixed(2)}</div>
-        `;
-        details.forEach(detail => {
-            detailsHTML += `
-                <div class="allocation-detail">
-                    Da ${detail.from}: ${detail.units} ${t('units')} × €${detail.rate.toFixed(4)}/${t('unit')} = €${detail.allocated.toFixed(2)}
+    // Display production departments in original order
+    let productionHTML = '';
+    productionDepts.forEach(dept => {
+        if (data.production_costs[dept]) {
+            const cost = data.production_costs[dept];
+            const direct = production_depts[dept];
+            productionHTML += `
+                <div class="result-item">
+                    <span><strong>${dept}</strong></span>
+                    <span>€${cost.toFixed(6)}</span>
+                </div>
+                <div class="result-item" style="font-size: 0.9em; color: #666;">
+                    <span data-i18n="directCost">${t('directCost')}</span>
+                    <span>€${direct.toFixed(6)}</span>
+                </div>
+                <div class="result-item" style="font-size: 0.9em; color: #666; margin-bottom: 15px;">
+                    <span data-i18n="allocated">${t('allocated')}</span>
+                    <span>€${(cost - direct).toFixed(6)}</span>
                 </div>
             `;
-        });
-        detailsHTML += `
-                <div class="allocation-detail" style="font-weight: 600; color: #667eea; margin-top: 10px;">
-                    ${t('total').toUpperCase()}: €${data.production_costs[dept].toFixed(2)}
+            
+            if (data.production_rates[dept]) {
+                productionHTML += `
+                    <div class="result-item" style="font-size: 0.9em; color: #667eea; margin-bottom: 15px;">
+                        <span data-i18n="costRate">${t('costRate')}</span>
+                        <span>€${data.production_rates[dept].toFixed(6)}/w.u</span>
+                    </div>
+                `;
+            }
+        }
+    });
+    document.getElementById('productionResults').innerHTML = productionHTML;
+    
+    // Display details in original order
+    let detailsHTML = '';
+    productionDepts.forEach(dept => {
+        if (data.production_details[dept]) {
+            const details = data.production_details[dept];
+            detailsHTML += `
+                <div class="detail-section">
+                    <h4>${dept} - ${t('allocationDetails')}</h4>
+                    <div class="allocation-detail">${t('directCost')}: €${production_depts[dept].toFixed(6)}</div>
+            `;
+            details.forEach(detail => {
+                detailsHTML += `
+                    <div class="allocation-detail">
+                        Da ${detail.from}: ${detail.units} ${t('units')} × €${detail.rate.toFixed(6)}/${t('unit')} = €${detail.allocated.toFixed(6)}
+                    </div>
+                `;
+            });
+            detailsHTML += `
+                    <div class="allocation-detail" style="font-weight: 600; color: #667eea; margin-top: 10px;">
+                        ${t('total').toUpperCase()}: €${data.production_costs[dept].toFixed(6)}
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+        }
     });
     document.getElementById('detailsSection').innerHTML = detailsHTML;
     
-    document.getElementById('totalBanner').textContent = `${t('totalGeneral').toUpperCase()}: €${data.total.toFixed(2)}`;
+    document.getElementById('totalBanner').textContent = `${t('totalGeneral').toUpperCase()}: €${data.total.toFixed(6)}`;
     
     document.getElementById('reciprocalResults').style.display = 'block';
     document.getElementById('reciprocalResults').scrollIntoView({ behavior: 'smooth' });
@@ -685,8 +697,11 @@ function calculateBreakEven() {
     displayBreakEvenResults(results);
 }
 
+let baseScenario = null;
+
 function displayBreakEvenResults(data) {
     lastBreakEvenResults = data;
+    baseScenario = data; // Save base scenario for sensitivity analysis
     
     let html = `
         <div class="results-grid">
@@ -752,7 +767,128 @@ function displayBreakEvenResults(data) {
     
     document.getElementById('breakEvenResultsContent').innerHTML = html;
     document.getElementById('breakEvenResults').style.display = 'block';
+    document.getElementById('sensitivitySection').style.display = 'block';
+    
+    // Reset sliders
+    document.getElementById('fcSlider').value = 0;
+    document.getElementById('vcSlider').value = 0;
+    document.getElementById('priceSlider').value = 0;
+    document.getElementById('fcValue').textContent = '0%';
+    document.getElementById('vcValue').textContent = '0%';
+    document.getElementById('priceValue').textContent = '0%';
+    
+    // Initialize sensitivity analysis
+    updateSensitivity();
+    
     document.getElementById('breakEvenResults').scrollIntoView({ behavior: 'smooth' });
+}
+
+function updateSensitivity() {
+    if (!baseScenario) return;
+    
+    const fcChange = parseFloat(document.getElementById('fcSlider').value);
+    const vcChange = parseFloat(document.getElementById('vcSlider').value);
+    const priceChange = parseFloat(document.getElementById('priceSlider').value);
+    
+    // Update slider value displays
+    document.getElementById('fcValue').textContent = (fcChange > 0 ? '+' : '') + fcChange + '%';
+    document.getElementById('vcValue').textContent = (vcChange > 0 ? '+' : '') + vcChange + '%';
+    document.getElementById('priceValue').textContent = (priceChange > 0 ? '+' : '') + priceChange + '%';
+    
+    // Calculate new values
+    const newFixedCosts = baseScenario.fixedCosts * (1 + fcChange / 100);
+    const newVariableCost = baseScenario.variableCost * (1 + vcChange / 100);
+    const newSellingPrice = baseScenario.sellingPrice * (1 + priceChange / 100);
+    
+    // Calculate new break-even
+    const newContributionMargin = newSellingPrice - newVariableCost;
+    const newBreakEvenUnits = newFixedCosts / newContributionMargin;
+    const newBreakEvenRevenue = newBreakEvenUnits * newSellingPrice;
+    
+    // Calculate changes
+    const bepChange = ((newBreakEvenUnits - baseScenario.breakEvenUnits) / baseScenario.breakEvenUnits * 100);
+    const cmChange = ((newContributionMargin - baseScenario.contributionMargin) / baseScenario.contributionMargin * 100);
+    
+    // Interpretation
+    let interpretation = '';
+    if (Math.abs(bepChange) < 1) {
+        interpretation = t('sensitivityLow') || 'Impatto minimo sul break-even point';
+    } else if (Math.abs(bepChange) < 10) {
+        interpretation = t('sensitivityModerate') || 'Impatto moderato sul break-even point';
+    } else if (Math.abs(bepChange) < 25) {
+        interpretation = t('sensitivityHigh') || 'Impatto significativo sul break-even point';
+    } else {
+        interpretation = t('sensitivityVeryHigh') || 'Impatto molto elevato sul break-even point';
+    }
+    
+    if (bepChange > 0) {
+        interpretation += '. ' + (t('bepIncreased') || 'Il punto di pareggio è aumentato, servono più vendite.');
+    } else if (bepChange < 0) {
+        interpretation += '. ' + (t('bepDecreased') || 'Il punto di pareggio è diminuito, servono meno vendite.');
+    }
+    
+    // Display results in table
+    const html = `
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; background: white; border-radius: 8px; overflow: hidden;">
+                <thead>
+                    <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <th style="padding: 12px; text-align: left;">Scenario</th>
+                        <th style="padding: 12px; text-align: right;">Fixed Costs</th>
+                        <th style="padding: 12px; text-align: right;">Variable Cost</th>
+                        <th style="padding: 12px; text-align: right;">Price</th>
+                        <th style="padding: 12px; text-align: right;">Contribution Margin</th>
+                        <th style="padding: 12px; text-align: right;">BEP (Units)</th>
+                        <th style="padding: 12px; text-align: right;">BEP (Revenue)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background: #f8f9fa;">
+                        <td style="padding: 12px; font-weight: 600;">Base</td>
+                        <td style="padding: 12px; text-align: right;">€${baseScenario.fixedCosts.toFixed(2)}</td>
+                        <td style="padding: 12px; text-align: right;">€${baseScenario.variableCost.toFixed(2)}</td>
+                        <td style="padding: 12px; text-align: right;">€${baseScenario.sellingPrice.toFixed(2)}</td>
+                        <td style="padding: 12px; text-align: right;">€${baseScenario.contributionMargin.toFixed(2)}</td>
+                        <td style="padding: 12px; text-align: right;">${Math.ceil(baseScenario.breakEvenUnits)}</td>
+                        <td style="padding: 12px; text-align: right;">€${baseScenario.breakEvenRevenue.toFixed(2)}</td>
+                    </tr>
+                    <tr style="background: white;">
+                        <td style="padding: 12px; font-weight: 600; color: #667eea;">New Scenario</td>
+                        <td style="padding: 12px; text-align: right; color: ${fcChange !== 0 ? '#667eea' : 'inherit'}; font-weight: ${fcChange !== 0 ? '600' : 'normal'};">
+                            €${newFixedCosts.toFixed(2)}
+                            ${fcChange !== 0 ? '<br><small style="color: ' + (fcChange > 0 ? '#f44336' : '#4caf50') + ';">(' + (fcChange > 0 ? '+' : '') + fcChange + '%)</small>' : ''}
+                        </td>
+                        <td style="padding: 12px; text-align: right; color: ${vcChange !== 0 ? '#667eea' : 'inherit'}; font-weight: ${vcChange !== 0 ? '600' : 'normal'};">
+                            €${newVariableCost.toFixed(2)}
+                            ${vcChange !== 0 ? '<br><small style="color: ' + (vcChange > 0 ? '#f44336' : '#4caf50') + ';">(' + (vcChange > 0 ? '+' : '') + vcChange + '%)</small>' : ''}
+                        </td>
+                        <td style="padding: 12px; text-align: right; color: ${priceChange !== 0 ? '#667eea' : 'inherit'}; font-weight: ${priceChange !== 0 ? '600' : 'normal'};">
+                            €${newSellingPrice.toFixed(2)}
+                            ${priceChange !== 0 ? '<br><small style="color: ' + (priceChange > 0 ? '#4caf50' : '#f44336') + ';">(' + (priceChange > 0 ? '+' : '') + priceChange + '%)</small>' : ''}
+                        </td>
+                        <td style="padding: 12px; text-align: right; font-weight: 600;">
+                            €${newContributionMargin.toFixed(2)}
+                            <br><small style="color: ${cmChange > 0 ? '#4caf50' : '#f44336'};">(${cmChange > 0 ? '+' : ''}${cmChange.toFixed(1)}%)</small>
+                        </td>
+                        <td style="padding: 12px; text-align: right; font-weight: 600; color: #667eea;">
+                            ${Math.ceil(newBreakEvenUnits)}
+                            <br><small style="color: ${bepChange < 0 ? '#4caf50' : '#f44336'};">(${bepChange > 0 ? '+' : ''}${bepChange.toFixed(1)}%)</small>
+                        </td>
+                        <td style="padding: 12px; text-align: right; font-weight: 600;">€${newBreakEvenRevenue.toFixed(2)}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="detail-section" style="margin-top: 20px; background: #e3f2fd; border-left-color: #2196f3;">
+            <h4>📊 ${t('interpretation') || 'Interpretazione'}</h4>
+            <div class="allocation-detail" style="font-size: 1.05em; line-height: 1.6;">
+                ${interpretation}
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('sensitivityResults').innerHTML = html;
 }
 
 // Initialize

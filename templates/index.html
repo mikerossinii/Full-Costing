@@ -474,6 +474,37 @@
             box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
         }
         
+        /* Sensitivity Analysis Sliders */
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: linear-gradient(to right, #f44336 0%, #ffc107 50%, #4caf50 100%);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border: none;
+        }
+        
         .results {
             margin-top: 30px;
             display: none;
@@ -898,6 +929,37 @@
                 
                 <div style="text-align: center; margin-top: 20px;">
                     <button class="calculate-btn" onclick="calculateBreakEven()" data-i18n="calculateBreakEven">🧮 Calcola Break-Even</button>
+                </div>
+                
+                <!-- Sensitivity Analysis -->
+                <div class="section" id="sensitivitySection" style="display: none;">
+                    <div class="section-title">🎯 <span data-i18n="sensitivityAnalysis">Sensitivity Analysis</span></div>
+                    
+                    <div class="wip-grid">
+                        <div class="cost-input">
+                            <label data-i18n="fixedCostsChange">Fixed Costs Change (%)</label>
+                            <input type="range" id="fcSlider" min="-30" max="30" value="0" step="5" oninput="updateSensitivity()">
+                            <div style="text-align: center; margin-top: 5px; font-weight: 600; color: #667eea;">
+                                <span id="fcValue">0%</span>
+                            </div>
+                        </div>
+                        <div class="cost-input">
+                            <label data-i18n="variableCostsChange">Variable Costs Change (%)</label>
+                            <input type="range" id="vcSlider" min="-30" max="30" value="0" step="5" oninput="updateSensitivity()">
+                            <div style="text-align: center; margin-top: 5px; font-weight: 600; color: #667eea;">
+                                <span id="vcValue">0%</span>
+                            </div>
+                        </div>
+                        <div class="cost-input">
+                            <label data-i18n="priceChange">Price Change (%)</label>
+                            <input type="range" id="priceSlider" min="-30" max="30" value="0" step="5" oninput="updateSensitivity()">
+                            <div style="text-align: center; margin-top: 5px; font-weight: 600; color: #667eea;">
+                                <span id="priceValue">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="sensitivityResults" style="margin-top: 20px;"></div>
                 </div>
                 
                 <div class="results" id="breakEvenResults">
