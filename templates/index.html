@@ -140,33 +140,31 @@
         /* Language Selector */
         .lang-selector {
             display: flex;
-            gap: 8px;
             align-items: center;
         }
         
-        .lang-btn {
+        .lang-selector select {
             background: transparent;
             border: 1px solid var(--primary);
             color: var(--primary);
-            padding: 5px 10px;
+            padding: 6px 12px;
             border-radius: 5px;
             cursor: pointer;
             font-size: 0.85rem;
             font-weight: 500;
+            font-family: 'Inter', sans-serif;
             transition: all 0.2s ease;
+            outline: none;
         }
         
-        .lang-btn:hover {
+        .lang-selector select:hover {
             background: var(--primary);
             color: white;
-            transform: translateY(-1px);
         }
         
-        .lang-btn.active {
-            background: var(--accent);
+        .lang-selector select:focus {
             border-color: var(--accent);
-            color: white;
-            font-weight: 600;
+            box-shadow: 0 0 0 2px rgba(227, 74, 59, 0.1);
         }
 
         /* Main Content */
@@ -752,12 +750,14 @@
             <div class="nav-item" onclick="showPage('wip')" role="button" tabindex="0" aria-label="Navigate to WIP Valuation">WIP Valuation</div>
             <div class="nav-item" onclick="showPage('breakeven')" role="button" tabindex="0" aria-label="Navigate to Break-Even Analysis">Break-Even Analysis</div>
         </div>
-        <div class="lang-selector" style="display: flex; gap: 8px; align-items: center;">
-            <button class="lang-btn active" data-lang="it" onclick="setLanguage('it')" aria-label="Switch to Italian" style="background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s;">IT</button>
-            <button class="lang-btn" data-lang="en" onclick="setLanguage('en')" aria-label="Switch to English" style="background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s;">EN</button>
-            <button class="lang-btn" data-lang="es" onclick="setLanguage('es')" aria-label="Switch to Spanish" style="background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s;">ES</button>
-            <button class="lang-btn" data-lang="fr" onclick="setLanguage('fr')" aria-label="Switch to French" style="background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s;">FR</button>
-            <button class="lang-btn" data-lang="ca" onclick="setLanguage('ca')" aria-label="Switch to Catalan" style="background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s;">CA</button>
+        <div class="lang-selector">
+            <select id="languageSelect" onchange="setLanguage(this.value)" aria-label="Select Language" style="background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; font-weight: 500; font-family: 'Inter', sans-serif; transition: all 0.2s;">
+                <option value="it">🇮🇹 IT</option>
+                <option value="en">🇬🇧 EN</option>
+                <option value="es">🇪🇸 ES</option>
+                <option value="fr">🇫🇷 FR</option>
+                <option value="ca">🏴 CA</option>
+            </select>
         </div>
     </nav>
 

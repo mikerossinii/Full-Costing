@@ -686,11 +686,11 @@ function setLanguage(lang) {
     localStorage.setItem('preferredLanguage', lang);
     updateAllTexts();
     
-    // Update active language button
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    document.querySelector(`[data-lang="${lang}"]`).classList.add('active');
+    // Update select dropdown
+    const select = document.getElementById('languageSelect');
+    if (select) {
+        select.value = lang;
+    }
     
     // Trigger custom event for dynamic content updates
     window.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang } }));
