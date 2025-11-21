@@ -3,33 +3,60 @@
 // ============================================================================
 
 function toggleMobileMenu() {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.querySelector('.mobile-overlay');
-    
-    sidebar.classList.toggle('active');
-    overlay.classList.toggle('active');
+    const navLinks = document.getElementById('navLinks');
+    navLinks.classList.toggle('active');
 }
 
 function showPage(pageName) {
+    // Check if already on this page
+    const targetPage = document.getElementById(pageName + '-page');
+    if (targetPage && targetPage.classList.contains('active')) {
+        return; // Already on this page, do nothing
+    }
+    
+    // Scroll to top FIRST, before changing page
+    window.scrollTo(0, 0);
+    
     // Hide all pages
     document.querySelectorAll('.page').forEach(page => {
         page.classList.remove('active');
     });
-    
+
     // Show selected page
-    document.getElementById(pageName + '-page').classList.add('active');
-    
-    // Update menu
-    document.querySelectorAll('.menu-item').forEach(item => {
-        item.classList.remove('active');
-    });
-    event.currentTarget.classList.add('active');
-    
-    // Close mobile menu if open
-    if (window.innerWidth <= 768) {
-        toggleMobileMenu();
+    if (targetPage) {
+        targetPage.classList.add('active');
     }
+
+    // Update menu
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+        // Check if this item corresponds to the pageName
+        if (item.getAttribute('onclick').includes(pageName)) {
+            item.classList.add('active');
+        }
+    });
+
+    // Close mobile menu if open
+    const navLinks = document.getElementById('navLinks');
+    if (navLinks.classList.contains('active')) {
+        navLinks.classList.remove('active');
+    }
+    
+    // Clear any errors when switching pages
+    clearErrors();
 }
+
+// Add keyboard navigation support
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                item.click();
+            }
+        });
+    });
+});
 
 // ============================================================================
 // RECIPROCAL METHOD
@@ -41,8 +68,8 @@ let lastReciprocalResults = null;
 let lastWIPResults = null;
 
 function init() {
-    supportDepts = ['Maintenance', 'Administration', 'Marketing'];
-    productionDepts = ['Production', 'Painting'];
+    supportDepts = ['HR', 'Administration', 'Accounting', 'IT', 'Marketing'];
+    productionDepts = ['Milling', 'Mixing & Extrusion', 'Drying', 'Packaging'];
     renderDepts();
 }
 
@@ -57,7 +84,7 @@ function renderDepts() {
         `;
     });
     document.getElementById('supportDeptsList').innerHTML = html;
-    
+
     html = '';
     productionDepts.forEach((dept, idx) => {
         html += `
@@ -99,26 +126,40 @@ function removeProductionDept(idx) {
 }
 
 function setupCosts() {
+    const defaultCosts = {
+        'HR': 5,
+        'Administration': 6,
+        'Accounting': 3,
+        'IT': 2,
+        'Marketing': 4,
+        'Milling': 35,
+        'Mixing & Extrusion': 50,
+        'Drying': 35,
+        'Packaging': 20
+    };
+    
     let html = '<div class="primary-costs">';
-    
+
     supportDepts.forEach(dept => {
+        const defaultValue = defaultCosts[dept] || 100;
         html += `
             <div class="cost-input">
                 <label>${dept}</label>
-                <input type="number" id="cost-${dept}" value="100" step="0.01">
+                <input type="number" id="cost-${dept}" value="${defaultValue}" step="0.01">
             </div>
         `;
     });
-    
+
     productionDepts.forEach(dept => {
+        const defaultValue = defaultCosts[dept] || 200;
         html += `
             <div class="cost-input">
                 <label>${dept}</label>
-                <input type="number" id="cost-${dept}" value="200" step="0.01">
+                <input type="number" id="cost-${dept}" value="${defaultValue}" step="0.01">
             </div>
         `;
     });
-    
+
     html += '</div>';
     document.getElementById('primaryCostsSection').innerHTML = html;
     document.getElementById('step2').style.display = 'block';
@@ -128,40 +169,59 @@ function setupCosts() {
 function setupServiceUnits() {
     const allDepts = [...supportDepts, ...productionDepts];
     
-    let html = '<table><thead><tr><th>Da / A</th>';
+    // Default service units from the table
+    const defaultUnits = {
+        'HR': {'HR': 0, 'Administration': 25, 'Accounting': 10, 'IT': 5, 'Marketing': 10, 'Milling': 25, 'Mixing & Extrusion': 30, 'Drying': 30, 'Packaging': 30},
+        'Administration': {'HR': 3000, 'Administration': 0, 'Accounting': 5000, 'IT': 3000, 'Marketing': 4000, 'Milling': 5000, 'Mixing & Extrusion': 6000, 'Drying': 3500, 'Packaging': 500},
+        'Accounting': {'HR': 1, 'Administration': 1, 'Accounting': 0, 'IT': 1, 'Marketing': 1, 'Milling': 1, 'Mixing & Extrusion': 1, 'Drying': 1, 'Packaging': 1},
+        'IT': {'HR': 1000, 'Administration': 1000, 'Accounting': 1000, 'IT': 0, 'Marketing': 1000, 'Milling': 15000, 'Mixing & Extrusion': 35000, 'Drying': 25000, 'Packaging': 15000},
+        'Marketing': {'HR': 0, 'Administration': 0, 'Accounting': 0, 'IT': 0, 'Marketing': 0, 'Milling': 35000, 'Mixing & Extrusion': 50000, 'Drying': 35000, 'Packaging': 20000}
+    };
+
+    let html = '<div class="table-responsive"><table><thead><tr><th>Da / A</th>';
     allDepts.forEach(dept => {
         html += `<th>${dept}</th>`;
     });
     html += '</tr></thead><tbody>';
-    
+
     supportDepts.forEach(fromDept => {
         html += `<tr><td class="row-label">${fromDept}</td>`;
         allDepts.forEach(toDept => {
             const disabled = fromDept === toDept ? 'disabled' : '';
-            const value = fromDept === toDept ? '0' : '100';
+            const value = defaultUnits[fromDept] && defaultUnits[fromDept][toDept] !== undefined 
+                ? defaultUnits[fromDept][toDept] 
+                : (fromDept === toDept ? '0' : '100');
             html += `<td><input type="number" id="units-${fromDept}-${toDept}" value="${value}" ${disabled} min="0" step="1"></td>`;
         });
         html += '</tr>';
     });
-    
-    html += '</tbody></table>';
+
+    html += '</tbody></table></div>';
     document.getElementById('serviceUnitsSection').innerHTML = html;
     document.getElementById('step3').style.display = 'block';
     document.getElementById('step3').scrollIntoView({ behavior: 'smooth' });
 }
 
 function setupAllocationBases() {
-    let html = '<div class="primary-costs">';
+    const defaultBases = {
+        'Milling': 15,
+        'Mixing & Extrusion': 35,
+        'Drying': 25,
+        'Packaging': 15
+    };
     
+    let html = '<div class="primary-costs">';
+
     productionDepts.forEach(dept => {
+        const defaultValue = defaultBases[dept] || 300;
         html += `
             <div class="cost-input">
                 <label>${dept} (w.u / machine hours)</label>
-                <input type="number" id="base-${dept}" value="300" step="0.01">
+                <input type="number" id="base-${dept}" value="${defaultValue}" step="0.01">
             </div>
         `;
     });
-    
+
     html += '</div>';
     document.getElementById('allocationBasesSection').innerHTML = html;
     document.getElementById('step4').style.display = 'block';
@@ -169,23 +229,39 @@ function setupAllocationBases() {
 }
 
 function calculateReciprocal() {
+    // Clear previous errors
+    clearErrors();
+    
     const support_depts = {};
     const production_depts = {};
     const service_units = {};
     const allocation_bases = {};
+
+    // Validate inputs
+    let hasError = false;
     
     supportDepts.forEach(dept => {
-        support_depts[dept] = parseFloat(document.getElementById(`cost-${dept}`).value);
+        const value = parseFloat(document.getElementById(`cost-${dept}`).value);
+        if (isNaN(value) || value < 0) {
+            showError(`Invalid cost for ${dept}`);
+            hasError = true;
+        }
+        support_depts[dept] = value;
     });
-    
+
     productionDepts.forEach(dept => {
-        production_depts[dept] = parseFloat(document.getElementById(`cost-${dept}`).value);
+        const value = parseFloat(document.getElementById(`cost-${dept}`).value);
+        if (isNaN(value) || value < 0) {
+            showError(`Invalid cost for ${dept}`);
+            hasError = true;
+        }
+        production_depts[dept] = value;
         const baseInput = document.getElementById(`base-${dept}`);
         if (baseInput && baseInput.value) {
             allocation_bases[dept] = parseFloat(baseInput.value);
         }
     });
-    
+
     const allDepts = [...supportDepts, ...productionDepts];
     supportDepts.forEach(fromDept => {
         service_units[fromDept] = {};
@@ -195,6 +271,13 @@ function calculateReciprocal() {
         });
     });
     
+    if (hasError) return;
+
+    // Show loading state
+    const resultsDiv = document.getElementById('reciprocalResults');
+    resultsDiv.classList.add('loading');
+    resultsDiv.style.display = 'block';
+
     fetch('/calculate', {
         method: 'POST',
         headers: {
@@ -207,20 +290,25 @@ function calculateReciprocal() {
             allocation_bases
         })
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            displayReciprocalResults(data, support_depts, production_depts, allocation_bases);
-        } else {
-            alert('Errore: ' + data.error);
-        }
-    });
+        .then(response => response.json())
+        .then(data => {
+            resultsDiv.classList.remove('loading');
+            if (data.success) {
+                displayReciprocalResults(data, support_depts, production_depts, allocation_bases);
+            } else {
+                showError('Errore: ' + data.error);
+            }
+        })
+        .catch(error => {
+            resultsDiv.classList.remove('loading');
+            showError('Errore di connessione: ' + error.message);
+        });
 }
 
 function displayReciprocalResults(data, support_depts, production_depts, allocation_bases) {
     // Save results for language switching
     lastReciprocalResults = { data, support_depts, production_depts, allocation_bases };
-    
+
     // Display support departments in original order
     let supportHTML = '';
     supportDepts.forEach(dept => {
@@ -250,7 +338,7 @@ function displayReciprocalResults(data, support_depts, production_depts, allocat
         }
     });
     document.getElementById('supportResults').innerHTML = supportHTML;
-    
+
     // Display production departments in original order
     let productionHTML = '';
     productionDepts.forEach(dept => {
@@ -271,7 +359,7 @@ function displayReciprocalResults(data, support_depts, production_depts, allocat
                     <span>€${(cost - direct).toFixed(6)}</span>
                 </div>
             `;
-            
+
             if (data.production_rates[dept]) {
                 productionHTML += `
                     <div class="result-item" style="font-size: 0.9em; color: #667eea; margin-bottom: 15px;">
@@ -283,7 +371,7 @@ function displayReciprocalResults(data, support_depts, production_depts, allocat
         }
     });
     document.getElementById('productionResults').innerHTML = productionHTML;
-    
+
     // Display details in original order
     let detailsHTML = '';
     productionDepts.forEach(dept => {
@@ -310,9 +398,13 @@ function displayReciprocalResults(data, support_depts, production_depts, allocat
         }
     });
     document.getElementById('detailsSection').innerHTML = detailsHTML;
-    
-    document.getElementById('totalBanner').textContent = `${t('totalGeneral').toUpperCase()}: €${data.total.toFixed(6)}`;
-    
+
+    const totalBanner = document.getElementById('totalBanner');
+    if (totalBanner) {
+        totalBanner.textContent = `${t('totalGeneral').toUpperCase()}: €${data.total.toFixed(2)}`;
+        totalBanner.style.textAlign = 'center';
+    }
+
     // Add procedimento section
     const procedimentoHTML = generateReciprocalProcedimento(data, support_depts, production_depts);
     detailsHTML += `
@@ -324,14 +416,14 @@ function displayReciprocalResults(data, support_depts, production_depts, allocat
         </div>
     `;
     document.getElementById('detailsSection').innerHTML = detailsHTML;
-    
+
     document.getElementById('reciprocalResults').style.display = 'block';
     document.getElementById('reciprocalResults').scrollIntoView({ behavior: 'smooth' });
 }
 
 function generateReciprocalProcedimento(data, support_depts, production_depts) {
-    let html = `<h3 style="color: #667eea; margin-bottom: 20px;">📚 ${t('procedimento') || 'Procedimento di Calcolo'}</h3>`;
-    
+    let html = `<h3 style="color: #4A3B32; margin-bottom: 20px;">${t('procedimento') || 'Procedimento di Calcolo'}</h3>`;
+
     // Step 1: Setup
     html += `
         <div class="step">
@@ -341,17 +433,17 @@ function generateReciprocalProcedimento(data, support_depts, production_depts) {
             </div>
         </div>
     `;
-    
+
     // Step 2: Equations
     html += `
         <div class="step">
             <div class="step-title">2️⃣ ${t('simultaneousEquations') || 'Equazioni Simultanee'}</div>
     `;
-    
+
     supportDepts.forEach(dept => {
         if (data.support_costs[dept]) {
             html += `<div class="formula">X_${dept} = €${support_depts[dept].toFixed(2)}`;
-            
+
             // Add allocations from other support departments
             supportDepts.forEach(otherDept => {
                 if (otherDept !== dept && data.support_total_units[otherDept] > 0) {
@@ -360,19 +452,19 @@ function generateReciprocalProcedimento(data, support_depts, production_depts) {
                     html += ` + (proporzione da ${otherDept})`;
                 }
             });
-            
+
             html += `</div>`;
         }
     });
-    
+
     html += `</div>`;
-    
+
     // Step 3: Solution
     html += `
         <div class="step">
             <div class="step-title">3️⃣ ${t('systemSolution') || 'Soluzione del Sistema'}</div>
     `;
-    
+
     supportDepts.forEach(dept => {
         if (data.support_costs[dept]) {
             html += `
@@ -389,15 +481,15 @@ function generateReciprocalProcedimento(data, support_depts, production_depts) {
             `;
         }
     });
-    
+
     html += `</div>`;
-    
+
     // Step 4: Allocation to Production
     html += `
         <div class="step">
             <div class="step-title">4️⃣ ${t('allocationToProduction') || 'Allocazione ai Dipartimenti di Produzione'}</div>
     `;
-    
+
     productionDepts.forEach(dept => {
         if (data.production_costs[dept]) {
             html += `
@@ -406,7 +498,7 @@ function generateReciprocalProcedimento(data, support_depts, production_depts) {
                     ${t('directCost')}: €${production_depts[dept].toFixed(6)}
                 </div>
             `;
-            
+
             if (data.production_details[dept]) {
                 data.production_details[dept].forEach(detail => {
                     html += `
@@ -416,7 +508,7 @@ function generateReciprocalProcedimento(data, support_depts, production_depts) {
                     `;
                 });
             }
-            
+
             html += `
                 <div class="calculation" style="font-weight: 600; color: #4caf50; margin-top: 10px;">
                     = ${t('total')}: €${data.production_costs[dept].toFixed(6)}
@@ -424,9 +516,9 @@ function generateReciprocalProcedimento(data, support_depts, production_depts) {
             `;
         }
     });
-    
+
     html += `</div>`;
-    
+
     return html;
 }
 
@@ -435,6 +527,8 @@ function generateReciprocalProcedimento(data, support_depts, production_depts) {
 // ============================================================================
 
 function calculateWIP() {
+    clearErrors();
+    
     const method = document.getElementById('wipMethod').value;
     const deptName = document.getElementById('wipDeptName').value;
     const materials = parseFloat(document.getElementById('wipMaterials').value);
@@ -446,7 +540,26 @@ function calculateWIP() {
     const started = parseFloat(document.getElementById('wipStarted').value);
     const completed = parseFloat(document.getElementById('wipCompleted').value);
     const endingCC = parseFloat(document.getElementById('wipEndingCC').value);
-    
+
+    // Validation
+    if (isNaN(materials) || materials < 0) {
+        showError('Invalid materials cost');
+        return;
+    }
+    if (isNaN(conversion) || conversion < 0) {
+        showError('Invalid conversion cost');
+        return;
+    }
+    if (isNaN(completed) || completed < 0) {
+        showError('Invalid completed units');
+        return;
+    }
+
+    // Show loading
+    const resultsDiv = document.getElementById('wipResults');
+    resultsDiv.classList.add('loading');
+    resultsDiv.style.display = 'block';
+
     fetch('/calculate_wip', {
         method: 'POST',
         headers: {
@@ -466,24 +579,29 @@ function calculateWIP() {
             ending_cc: endingCC
         })
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            displayWIPResults(data);
-        } else {
-            alert('Errore: ' + data.error);
-        }
-    });
+        .then(response => response.json())
+        .then(data => {
+            resultsDiv.classList.remove('loading');
+            if (data.success) {
+                displayWIPResults(data);
+            } else {
+                showError('Errore: ' + data.error);
+            }
+        })
+        .catch(error => {
+            resultsDiv.classList.remove('loading');
+            showError('Errore di connessione: ' + error.message);
+        });
 }
 
 function displayWIPResults(data) {
     // Save results for language switching
     lastWIPResults = data;
-    
+
     let html = `
         <div class="results-grid">
             <div class="result-card">
-                <h3>📊 ${t('physicalFlow')}</h3>
+                <h3>${t('physicalFlow')}</h3>
                 <div class="result-item">
                     <span data-i18n="openingWIPLabel">${t('openingWIPLabel')}</span>
                     <span>${data.physical_flow.opening_wip} ${t('units')}</span>
@@ -507,7 +625,7 @@ function displayWIPResults(data) {
             </div>
             
             <div class="result-card">
-                <h3>💰 ${t('equivalentUnits')}</h3>
+                <h3>${t('equivalentUnits')}</h3>
                 <div class="result-item">
                     <span data-i18n="materials">${t('materials')}</span>
                     <span>${data.equivalent_units.materials.toFixed(2)} EU</span>
@@ -519,7 +637,7 @@ function displayWIPResults(data) {
             </div>
             
             <div class="result-card">
-                <h3>📈 ${t('costPerEU')}</h3>
+                <h3>${t('costPerEU')}</h3>
                 <div class="result-item">
                     <span data-i18n="materials">${t('materials')}</span>
                     <span>€${data.cost_per_eu.materials.toFixed(4)}/EU</span>
@@ -535,7 +653,7 @@ function displayWIPResults(data) {
             </div>
         </div>
     `;
-    
+
     // FIFO Breakdown in 3 sections
     if (data.method === 'FIFO' && data.fifo_breakdown) {
         html += `
@@ -572,7 +690,7 @@ function displayWIPResults(data) {
         // Non-FIFO methods
         html += `
             <div class="detail-section">
-                <h4>🎯 Valutazione Finale</h4>
+                <h4>Valutazione Finale</h4>
                 <div class="allocation-detail"><strong>${t('finishedGoods')} (${t('completed')} ${t('units')}):</strong></div>
                 <div class="allocation-detail">€${data.valuation.finished_goods.toFixed(2)}</div>
                 <div class="allocation-detail" style="margin-top: 15px;"><strong>${t('endingWIP')}:</strong></div>
@@ -584,13 +702,13 @@ function displayWIPResults(data) {
             </div>
         `;
     }
-    
+
     html += `
         <div class="total-banner">
-            ${t('finishedGoods').toUpperCase()}: €${data.valuation.finished_goods.toFixed(2)} | ${t('endingWIP').toUpperCase()}: €${data.valuation.ending_wip_total.toFixed(2)} | TOTAL: €${data.total_costs.toFixed(2)}
+            ${t('finishedGoods')}: €${data.valuation.finished_goods.toFixed(2)} | ${t('endingWIP')}: €${data.valuation.ending_wip_total.toFixed(2)} | Total: €${data.total_costs.toFixed(2)}
         </div>
     `;
-    
+
     // Add procedimento
     html += `
         <button class="procedimento-toggle" onclick="toggleProcedimento('wip')">
@@ -600,15 +718,15 @@ function displayWIPResults(data) {
             ${generateWIPProcedimento(data)}
         </div>
     `;
-    
+
     document.getElementById('wipResultsContent').innerHTML = html;
     document.getElementById('wipResults').style.display = 'block';
     document.getElementById('wipResults').scrollIntoView({ behavior: 'smooth' });
 }
 
 function generateWIPProcedimento(data) {
-    let html = `<h3 style="color: #667eea; margin-bottom: 20px;">📚 ${t('procedimento') || 'Procedimento di Calcolo'}</h3>`;
-    
+    let html = `<h3 style="color: #4A3B32; margin-bottom: 20px;">📚 ${t('procedimento') || 'Procedimento di Calcolo'}</h3>`;
+
     // Step 1: Physical Flow
     html += `
         <div class="step">
@@ -623,7 +741,7 @@ function generateWIPProcedimento(data) {
             </div>
         </div>
     `;
-    
+
     // Step 2: Equivalent Units
     html += `
         <div class="step">
@@ -634,7 +752,7 @@ function generateWIPProcedimento(data) {
             </div>
         </div>
     `;
-    
+
     // Step 3: Cost per EU
     html += `
         <div class="step">
@@ -650,7 +768,7 @@ function generateWIPProcedimento(data) {
             </div>
         </div>
     `;
-    
+
     // Step 4: Valuation
     if (data.method === 'FIFO' && data.fifo_breakdown) {
         html += `
@@ -679,7 +797,7 @@ function generateWIPProcedimento(data) {
             </div>
         `;
     }
-    
+
     html += `
         <div class="step">
             <div class="step-title">5️⃣ ${t('finalValuation') || 'Valutazione Finale'}</div>
@@ -692,7 +810,7 @@ function generateWIPProcedimento(data) {
             </div>
         </div>
     `;
-    
+
     return html;
 }
 
@@ -708,19 +826,19 @@ function updateBreakEvenChart() {
     const variableCost = parseFloat(document.getElementById('beVariableCost').value) || 0;
     const fixedCosts = parseFloat(document.getElementById('beFixedCosts').value) || 0;
     const expectedSales = parseFloat(document.getElementById('beExpectedSales').value) || 0;
-    
+
     if (sellingPrice <= 0 || variableCost < 0 || fixedCosts < 0) return;
-    
+
     const contributionMargin = sellingPrice - variableCost;
     if (contributionMargin <= 0) return;
-    
+
     const breakEvenUnits = fixedCosts / contributionMargin;
-    
+
     // Generate data points for the chart
     const maxUnits = Math.max(breakEvenUnits * 2, expectedSales * 1.2, 100);
     const dataPoints = [];
     const step = maxUnits / 50;
-    
+
     for (let units = 0; units <= maxUnits; units += step) {
         const revenue = units * sellingPrice;
         const totalCost = fixedCosts + (units * variableCost);
@@ -731,15 +849,15 @@ function updateBreakEvenChart() {
             profit: revenue - totalCost
         });
     }
-    
+
     // Create or update chart
     const ctx = document.getElementById('breakEvenChart');
     if (!ctx) return;
-    
+
     if (breakEvenChart) {
         breakEvenChart.destroy();
     }
-    
+
     breakEvenChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -778,7 +896,7 @@ function updateBreakEvenChart() {
         options: {
             responsive: true,
             maintainAspectRatio: true,
-            aspectRatio: 2,
+            aspectRatio: window.innerWidth < 768 ? 1.2 : 2,
             plugins: {
                 title: {
                     display: true,
@@ -791,7 +909,7 @@ function updateBreakEvenChart() {
                 },
                 tooltip: {
                     callbacks: {
-                        label: function(context) {
+                        label: function (context) {
                             return context.dataset.label + ': €' + context.parsed.y.toFixed(2);
                         }
                     }
@@ -825,7 +943,7 @@ function updateBreakEvenChart() {
                         font: { weight: 'bold' }
                     },
                     ticks: {
-                        callback: function(value) {
+                        callback: function (value) {
                             return Math.round(value);
                         }
                     }
@@ -837,7 +955,7 @@ function updateBreakEvenChart() {
                         font: { weight: 'bold' }
                     },
                     ticks: {
-                        callback: function(value) {
+                        callback: function (value) {
                             return '€' + value.toLocaleString();
                         }
                     }
@@ -852,36 +970,60 @@ function updateBreakEvenChart() {
 }
 
 function calculateBreakEven() {
+    clearErrors();
+    
     const productName = document.getElementById('beProductName').value;
     const sellingPrice = parseFloat(document.getElementById('beSellingPrice').value);
     const variableCost = parseFloat(document.getElementById('beVariableCost').value);
     const fixedCosts = parseFloat(document.getElementById('beFixedCosts').value);
     const targetProfit = parseFloat(document.getElementById('beTargetProfit').value) || 0;
     const expectedSales = parseFloat(document.getElementById('beExpectedSales').value) || 0;
-    
+
+    // Validation
+    if (!productName) {
+        showError('Please enter a product name');
+        return;
+    }
+    if (isNaN(sellingPrice) || sellingPrice <= 0) {
+        showError('Selling price must be greater than 0');
+        return;
+    }
+    if (isNaN(variableCost) || variableCost < 0) {
+        showError('Variable cost cannot be negative');
+        return;
+    }
+    if (variableCost >= sellingPrice) {
+        showError('Variable cost must be less than selling price');
+        return;
+    }
+    if (isNaN(fixedCosts) || fixedCosts < 0) {
+        showError('Fixed costs cannot be negative');
+        return;
+    }
+
     // Update chart
     updateBreakEvenChart();
-    
+
     // Calculate contribution margin
     const contributionMargin = sellingPrice - variableCost;
     const contributionMarginRatio = (contributionMargin / sellingPrice) * 100;
-    
+
     // Calculate break-even point
     const breakEvenUnits = fixedCosts / contributionMargin;
     const breakEvenRevenue = breakEvenUnits * sellingPrice;
-    
+
     // Calculate units needed for target profit
     const unitsForTarget = (fixedCosts + targetProfit) / contributionMargin;
-    
+
     // Calculate margin of safety
     let marginOfSafety = 0;
     let marginOfSafetyPercent = 0;
     let operatingLeverage = 0;
-    
+
     if (expectedSales > 0) {
         marginOfSafety = expectedSales - breakEvenUnits;
         marginOfSafetyPercent = (marginOfSafety / expectedSales) * 100;
-        
+
         // Operating leverage = Contribution Margin / Operating Income
         const totalContribution = contributionMargin * expectedSales;
         const operatingIncome = totalContribution - fixedCosts;
@@ -889,7 +1031,7 @@ function calculateBreakEven() {
             operatingLeverage = totalContribution / operatingIncome;
         }
     }
-    
+
     const results = {
         productName,
         sellingPrice,
@@ -906,7 +1048,7 @@ function calculateBreakEven() {
         marginOfSafetyPercent,
         operatingLeverage
     };
-    
+
     displayBreakEvenResults(results);
 }
 
@@ -915,11 +1057,11 @@ let baseScenario = null;
 function displayBreakEvenResults(data) {
     lastBreakEvenResults = data;
     baseScenario = data; // Save base scenario for sensitivity analysis
-    
+
     let html = `
         <div class="results-grid">
             <div class="result-card">
-                <h3>💰 ${t('contributionMargin')}</h3>
+                <h3>${t('contributionMargin')}</h3>
                 <div class="result-item">
                     <span>${t('contributionMargin')}</span>
                     <span>€${data.contributionMargin.toFixed(2)}/${t('unit')}</span>
@@ -931,7 +1073,7 @@ function displayBreakEvenResults(data) {
             </div>
             
             <div class="result-card">
-                <h3>🎯 Break-Even Point</h3>
+                <h3>Break-Even Point</h3>
                 <div class="result-item">
                     <span>${t('breakEvenUnits')}</span>
                     <span>${Math.ceil(data.breakEvenUnits)} ${t('units')}</span>
@@ -943,7 +1085,7 @@ function displayBreakEvenResults(data) {
             </div>
             
             <div class="result-card">
-                <h3>📈 ${t('targetAnalysis')}</h3>
+                <h3>${t('targetAnalysis')}</h3>
                 <div class="result-item">
                     <span>${t('unitsForTarget')}</span>
                     <span>${Math.ceil(data.unitsForTarget)} ${t('units')}</span>
@@ -955,40 +1097,48 @@ function displayBreakEvenResults(data) {
             </div>
         </div>
     `;
-    
+
     if (data.expectedSales > 0) {
         html += `
-            <div class="detail-section">
-                <h4>🛡️ ${t('marginOfSafety')}</h4>
-                <div class="allocation-detail">${t('expectedSales')}: ${data.expectedSales} ${t('units')}</div>
-                <div class="allocation-detail">Break-Even: ${Math.ceil(data.breakEvenUnits)} ${t('units')}</div>
-                <div class="allocation-detail" style="font-weight: 600; color: #667eea; margin-top: 10px;">
-                    ${t('marginOfSafety')}: ${data.marginOfSafety.toFixed(0)} ${t('units')} (${data.marginOfSafetyPercent.toFixed(2)}%)
+            <div class="result-card" style="border-left-color: #4caf50;">
+                <h3>${t('marginOfSafety')}</h3>
+                <div class="result-item">
+                    <span>${t('expectedSales')}</span>
+                    <span>${data.expectedSales} ${t('units')}</span>
                 </div>
-                <div class="allocation-detail" style="font-weight: 600; color: #667eea; margin-top: 10px;">
-                    ${t('operatingLeverage')}: ${data.operatingLeverage.toFixed(2)}
+                <div class="result-item">
+                    <span>Break-Even</span>
+                    <span>${Math.ceil(data.breakEvenUnits)} ${t('units')}</span>
+                </div>
+                <div class="result-item" style="font-weight: 600; color: #4caf50;">
+                    <span>${t('marginOfSafety')}</span>
+                    <span>${data.marginOfSafety.toFixed(0)} ${t('units')} (${data.marginOfSafetyPercent.toFixed(2)}%)</span>
+                </div>
+                <div class="result-item" style="font-weight: 600; color: #667eea;">
+                    <span>${t('operatingLeverage')}</span>
+                    <span>${data.operatingLeverage.toFixed(2)}</span>
                 </div>
             </div>
         `;
     }
-    
+
     html += `
         <div class="total-banner">
-            ${data.productName.toUpperCase()} | Break-Even: ${Math.ceil(data.breakEvenUnits)} ${t('units')} | €${data.breakEvenRevenue.toFixed(2)}
+            Break-Even Point: ${Math.ceil(data.breakEvenUnits)} ${t('units')} | Revenue: €${data.breakEvenRevenue.toFixed(2)}
         </div>
         
         <button class="procedimento-toggle" onclick="toggleProcedimento('breakeven')">
-            📖 <span data-i18n="showProcedimento">${t('showProcedimento') || 'Mostra Procedimento'}</span>
+            <span data-i18n="showProcedimento">${t('showProcedimento') || 'Mostra Procedimento'}</span>
         </button>
         <div id="breakeven-procedimento" class="procedimento-content">
             ${generateBreakEvenProcedimento(data)}
         </div>
     `;
-    
+
     document.getElementById('breakEvenResultsContent').innerHTML = html;
     document.getElementById('breakEvenResults').style.display = 'block';
     document.getElementById('sensitivitySection').style.display = 'block';
-    
+
     // Reset sliders
     document.getElementById('fcSlider').value = 0;
     document.getElementById('vcSlider').value = 0;
@@ -996,16 +1146,16 @@ function displayBreakEvenResults(data) {
     document.getElementById('fcValue').textContent = '0%';
     document.getElementById('vcValue').textContent = '0%';
     document.getElementById('priceValue').textContent = '0%';
-    
+
     // Initialize sensitivity analysis
     updateSensitivity();
-    
+
     document.getElementById('breakEvenResults').scrollIntoView({ behavior: 'smooth' });
 }
 
 function generateBreakEvenProcedimento(data) {
-    let html = `<h3 style="color: #667eea; margin-bottom: 20px;">📚 ${t('procedimento') || 'Procedimento di Calcolo'}</h3>`;
-    
+    let html = `<h3 style="color: #4A3B32; margin-bottom: 20px;">📚 ${t('procedimento') || 'Procedimento di Calcolo'}</h3>`;
+
     // Step 1: Input Data
     html += `
         <div class="step">
@@ -1017,7 +1167,7 @@ function generateBreakEvenProcedimento(data) {
             </div>
         </div>
     `;
-    
+
     // Step 2: Contribution Margin
     html += `
         <div class="step">
@@ -1031,7 +1181,7 @@ function generateBreakEvenProcedimento(data) {
             </div>
         </div>
     `;
-    
+
     // Step 3: Break-Even Point
     html += `
         <div class="step">
@@ -1046,7 +1196,7 @@ function generateBreakEvenProcedimento(data) {
             </div>
         </div>
     `;
-    
+
     // Step 4: Target Profit
     if (data.targetProfit > 0) {
         html += `
@@ -1060,7 +1210,7 @@ function generateBreakEvenProcedimento(data) {
             </div>
         `;
     }
-    
+
     // Step 5: Margin of Safety
     if (data.expectedSales > 0) {
         html += `
@@ -1079,50 +1229,50 @@ function generateBreakEvenProcedimento(data) {
             </div>
         `;
     }
-    
+
     return html;
 }
 
 function updateSensitivity() {
     if (!baseScenario) return;
-    
+
     const fcChange = parseFloat(document.getElementById('fcSlider').value);
     const vcChange = parseFloat(document.getElementById('vcSlider').value);
     const priceChange = parseFloat(document.getElementById('priceSlider').value);
-    
+
     // Update slider value displays
     document.getElementById('fcValue').textContent = (fcChange > 0 ? '+' : '') + fcChange + '%';
     document.getElementById('vcValue').textContent = (vcChange > 0 ? '+' : '') + vcChange + '%';
     document.getElementById('priceValue').textContent = (priceChange > 0 ? '+' : '') + priceChange + '%';
-    
+
     // Calculate new values
     const newFixedCosts = baseScenario.fixedCosts * (1 + fcChange / 100);
     const newVariableCost = baseScenario.variableCost * (1 + vcChange / 100);
     const newSellingPrice = baseScenario.sellingPrice * (1 + priceChange / 100);
-    
+
     // Calculate new break-even
     const newContributionMargin = newSellingPrice - newVariableCost;
     const newBreakEvenUnits = newFixedCosts / newContributionMargin;
     const newBreakEvenRevenue = newBreakEvenUnits * newSellingPrice;
-    
+
     // Calculate margin of safety if expected sales exist
     let newMarginOfSafety = 0;
     let newMarginOfSafetyPercent = 0;
     let mosChange = 0;
-    
+
     if (baseScenario.expectedSales > 0) {
         newMarginOfSafety = baseScenario.expectedSales - newBreakEvenUnits;
         newMarginOfSafetyPercent = (newMarginOfSafety / baseScenario.expectedSales) * 100;
-        
+
         if (baseScenario.marginOfSafety > 0) {
             mosChange = ((newMarginOfSafety - baseScenario.marginOfSafety) / baseScenario.marginOfSafety * 100);
         }
     }
-    
+
     // Calculate changes
     const bepChange = ((newBreakEvenUnits - baseScenario.breakEvenUnits) / baseScenario.breakEvenUnits * 100);
     const cmChange = ((newContributionMargin - baseScenario.contributionMargin) / baseScenario.contributionMargin * 100);
-    
+
     // Interpretation
     let interpretation = '';
     if (Math.abs(bepChange) < 1) {
@@ -1134,13 +1284,13 @@ function updateSensitivity() {
     } else {
         interpretation = t('sensitivityVeryHigh');
     }
-    
+
     if (bepChange > 0) {
         interpretation += '. ' + t('bepIncreased') + '.';
     } else if (bepChange < 0) {
         interpretation += '. ' + t('bepDecreased') + '.';
     }
-    
+
     // Add margin of safety interpretation if applicable
     if (baseScenario.expectedSales > 0) {
         interpretation += '<br><br><strong>' + t('marginOfSafety') + ':</strong> ';
@@ -1153,14 +1303,14 @@ function updateSensitivity() {
         } else {
             interpretation += t('mosWorse') || 'Il margine di sicurezza è peggiorato significativamente. L\'azienda è più vicina al punto di pareggio e quindi più a rischio.';
         }
-        
+
         if (newMarginOfSafetyPercent < 10) {
             interpretation += ' ⚠️ ' + (t('mosWarning') || 'Attenzione: margine molto basso!');
         } else if (newMarginOfSafetyPercent > 30) {
             interpretation += ' ✅ ' + (t('mosGood') || 'Margine di sicurezza confortevole.');
         }
     }
-    
+
     // Display results in table
     const html = `
         <div style="overflow-x: auto;">
@@ -1187,16 +1337,16 @@ function updateSensitivity() {
                         ${baseScenario.expectedSales > 0 ? `<td style="padding: 12px; text-align: right;">${baseScenario.marginOfSafety.toFixed(0)} (${baseScenario.marginOfSafetyPercent.toFixed(1)}%)</td>` : ''}
                     </tr>
                     <tr style="background: white;">
-                        <td style="padding: 12px; font-weight: 600; color: #667eea;">${t('newScenario') || 'New'}</td>
-                        <td style="padding: 12px; text-align: right; color: ${fcChange !== 0 ? '#667eea' : 'inherit'}; font-weight: ${fcChange !== 0 ? '600' : 'normal'};">
+                        <td style="padding: 12px; font-weight: 600; color: #E34A3B;">${t('newScenario') || 'New'}</td>
+                        <td style="padding: 12px; text-align: right; color: ${fcChange !== 0 ? '#E34A3B' : 'inherit'}; font-weight: ${fcChange !== 0 ? '600' : 'normal'};">
                             €${newFixedCosts.toFixed(2)}
                             ${fcChange !== 0 ? '<br><small style="color: ' + (fcChange > 0 ? '#f44336' : '#4caf50') + ';">(' + (fcChange > 0 ? '+' : '') + fcChange + '%)</small>' : ''}
                         </td>
-                        <td style="padding: 12px; text-align: right; color: ${vcChange !== 0 ? '#667eea' : 'inherit'}; font-weight: ${vcChange !== 0 ? '600' : 'normal'};">
+                        <td style="padding: 12px; text-align: right; color: ${vcChange !== 0 ? '#E34A3B' : 'inherit'}; font-weight: ${vcChange !== 0 ? '600' : 'normal'};">
                             €${newVariableCost.toFixed(2)}
                             ${vcChange !== 0 ? '<br><small style="color: ' + (vcChange > 0 ? '#f44336' : '#4caf50') + ';">(' + (vcChange > 0 ? '+' : '') + vcChange + '%)</small>' : ''}
                         </td>
-                        <td style="padding: 12px; text-align: right; color: ${priceChange !== 0 ? '#667eea' : 'inherit'}; font-weight: ${priceChange !== 0 ? '600' : 'normal'};">
+                        <td style="padding: 12px; text-align: right; color: ${priceChange !== 0 ? '#E34A3B' : 'inherit'}; font-weight: ${priceChange !== 0 ? '600' : 'normal'};">
                             €${newSellingPrice.toFixed(2)}
                             ${priceChange !== 0 ? '<br><small style="color: ' + (priceChange > 0 ? '#4caf50' : '#f44336') + ';">(' + (priceChange > 0 ? '+' : '') + priceChange + '%)</small>' : ''}
                         </td>
@@ -1204,7 +1354,7 @@ function updateSensitivity() {
                             €${newContributionMargin.toFixed(2)}
                             <br><small style="color: ${cmChange > 0 ? '#4caf50' : '#f44336'};">(${cmChange > 0 ? '+' : ''}${cmChange.toFixed(1)}%)</small>
                         </td>
-                        <td style="padding: 12px; text-align: right; font-weight: 600; color: #667eea;">
+                        <td style="padding: 12px; text-align: right; font-weight: 600; color: #E34A3B;">
                             ${Math.ceil(newBreakEvenUnits)}
                             <br><small style="color: ${bepChange < 0 ? '#4caf50' : '#f44336'};">(${bepChange > 0 ? '+' : ''}${bepChange.toFixed(1)}%)</small>
                         </td>
@@ -1218,14 +1368,14 @@ function updateSensitivity() {
             </table>
         </div>
         
-        <div class="detail-section" style="margin-top: 20px; background: #e3f2fd; border-left-color: #2196f3;">
-            <h4>📊 ${t('interpretation')}</h4>
+        <div class="detail-section" style="margin-top: 20px; background: #F5F5F0; border-left-color: #E34A3B;">
+            <h4>${t('interpretation')}</h4>
             <div class="allocation-detail" style="font-size: 1.05em; line-height: 1.6;">
                 ${interpretation}
             </div>
         </div>
     `;
-    
+
     document.getElementById('sensitivityResults').innerHTML = html;
 }
 
@@ -1233,6 +1383,61 @@ function toggleProcedimento(module) {
     const element = document.getElementById(module + '-procedimento');
     if (element) {
         element.classList.toggle('active');
+    }
+}
+
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+function showError(message) {
+    // Remove existing errors
+    clearErrors();
+    
+    // Create error element
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.textContent = '⚠️ ' + message;
+    
+    // Insert at top of active page
+    const activePage = document.querySelector('.page.active .container');
+    if (activePage) {
+        activePage.insertBefore(errorDiv, activePage.firstChild);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            errorDiv.remove();
+        }, 5000);
+    }
+}
+
+function clearErrors() {
+    document.querySelectorAll('.error-message').forEach(el => el.remove());
+}
+
+function showSuccess(message) {
+    const successDiv = document.createElement('div');
+    successDiv.className = 'error-message';
+    successDiv.style.background = '#e8f5e9';
+    successDiv.style.color = '#4caf50';
+    successDiv.style.borderLeftColor = '#4caf50';
+    successDiv.textContent = '✅ ' + message;
+    
+    const activePage = document.querySelector('.page.active .container');
+    if (activePage) {
+        activePage.insertBefore(successDiv, activePage.firstChild);
+        setTimeout(() => successDiv.remove(), 3000);
+    }
+}
+
+// Add smooth scroll behavior
+function smoothScrollTo(element) {
+    if (element) {
+        element.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start',
+            inline: 'nearest'
+        });
     }
 }
 
@@ -1257,22 +1462,22 @@ window.addEventListener('languageChanged', () => {
             lastReciprocalResults.allocation_bases
         );
     }
-    
+
     // Regenerate WIP results if they exist
     if (lastWIPResults) {
         displayWIPResults(lastWIPResults);
     }
-    
+
     // Regenerate Break-Even results if they exist
     if (lastBreakEvenResults) {
         displayBreakEvenResults(lastBreakEvenResults);
     }
-    
+
     // Update break-even chart with new language
     if (breakEvenChart) {
         updateBreakEvenChart();
     }
-    
+
     // Update sensitivity analysis with new language
     if (baseScenario && document.getElementById('sensitivitySection').style.display !== 'none') {
         updateSensitivity();
