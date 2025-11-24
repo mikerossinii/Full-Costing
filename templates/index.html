@@ -12,6 +12,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+    <!-- KaTeX for LaTeX rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;600;700&display=swap');
 
@@ -745,10 +749,12 @@
     <nav class="top-nav">
         <a href="#" class="nav-logo" onclick="showPage('nuova')" aria-label="Home">RUMMO</a>
         <div class="nav-links" id="navLinks">
-            <div class="nav-item active" onclick="showPage('nuova')" role="button" tabindex="0" aria-label="Navigate to Nuova Pagina">Home</div>
-            <div class="nav-item" onclick="showPage('reciprocal')" role="button" tabindex="0" aria-label="Navigate to Reciprocal Method">Reciprocal Method</div>
-            <div class="nav-item" onclick="showPage('wip')" role="button" tabindex="0" aria-label="Navigate to WIP Valuation">WIP Valuation</div>
-            <div class="nav-item" onclick="showPage('breakeven')" role="button" tabindex="0" aria-label="Navigate to Break-Even Analysis">Break-Even Analysis</div>
+            <div class="nav-item active" onclick="showPage('nuova')" role="button" tabindex="0" aria-label="Navigate to Home" data-i18n="navHome">Home</div>
+            <div class="nav-item" onclick="showPage('reciprocal')" role="button" tabindex="0" aria-label="Navigate to Reciprocal Method" data-i18n="navReciprocal">Reciprocal Method</div>
+            <div class="nav-item" onclick="showPage('wip')" role="button" tabindex="0" aria-label="Navigate to WIP Valuation" data-i18n="navWip">WIP Valuation</div>
+            <div class="nav-item" onclick="showPage('breakeven')" role="button" tabindex="0" aria-label="Navigate to Break-Even Analysis" data-i18n="navBreakeven">Break-Even Analysis</div>
+            <div class="nav-item" onclick="showPage('variance')" role="button" tabindex="0" aria-label="Navigate to Variance Analysis" data-i18n="navVariance">Variance Analysis</div>
+            <div class="nav-item" onclick="showPage('abc')" role="button" tabindex="0" aria-label="Navigate to ABC Costing" data-i18n="navAbc">ABC Costing</div>
         </div>
         <div class="lang-selector">
             <select id="languageSelect" onchange="setLanguage(this.value)" aria-label="Select Language" style="background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; font-weight: 500; font-family: 'Inter', sans-serif; transition: all 0.2s;">
@@ -1101,11 +1107,169 @@
                 </div>
             </div>
         </div>
+        <!-- Variance Analysis Page -->
+        <div id="variance-page" class="page">
+            <div class="container">
+                <div style="text-align: center; margin-bottom: 25px; padding-top: 20px;">
+                    <h1 data-i18n="varianceTitle">Variance Analysis</h1>
+                    <p class="subtitle" data-i18n="varianceSubtitle">Flexible Budget & Variance Calculation</p>
+                </div>
+
+                <div class="section">
+                    <div class="section-title"><span class="step-number">1</span><span data-i18n="budgetInfo">Budget Information</span></div>
+                    <div class="wip-grid">
+                        <div class="cost-input">
+                            <label data-i18n="expectedProduction">Expected Production (units)</label>
+                            <input type="number" id="abcExpectedProd" value="12000" step="1">
+                        </div>
+                        <div class="cost-input">
+                            <label data-i18n="sellingPriceUnit">Selling Price (€/unit)</label>
+                            <input type="number" id="abcSellingPrice" value="3000" step="0.01">
+                        </div>
+                        <div class="cost-input">
+                            <label data-i18n="totalFixedCosts">Total Fixed Costs (€)</label>
+                            <input type="number" id="abcFixedCosts" value="2400000" step="0.01">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title"><span class="step-number">2</span><span data-i18n="dmStandard">Direct Materials - Standard</span></div>
+                    <div class="wip-grid">
+                        <div class="cost-input">
+                            <label data-i18n="standardQuantity">Standard Quantity (kg/unit)</label>
+                            <input type="number" id="abcDMStdQty" value="24" step="0.01" oninput="updateDMStandardCost()">
+                        </div>
+                        <div class="cost-input">
+                            <label data-i18n="standardPrice">Standard Price (€/kg)</label>
+                            <input type="number" id="abcDMStdPrice" value="20" step="0.01" oninput="updateDMStandardCost()">
+                        </div>
+                        <div class="cost-input">
+                            <label data-i18n="standardUnitCost">Standard Unit Cost (€)</label>
+                            <input type="number" id="abcDMStdCost" value="480" step="0.01" readonly style="background: #f0f0f0;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title"><span class="step-number">3</span><span data-i18n="dlStandard">Direct Labor - Standard</span></div>
+                    <div class="wip-grid">
+                        <div class="cost-input">
+                            <label data-i18n="standardHours">Standard Hours (hours/unit)</label>
+                            <input type="number" id="abcDLStdHours" value="14" step="0.01" oninput="updateDLStandardCost()">
+                        </div>
+                        <div class="cost-input">
+                            <label data-i18n="standardRate">Standard Rate (€/hour)</label>
+                            <input type="number" id="abcDLStdRate" value="100" step="0.01" oninput="updateDLStandardCost()">
+                        </div>
+                        <div class="cost-input">
+                            <label data-i18n="standardUnitCost">Standard Unit Cost (€)</label>
+                            <input type="number" id="abcDLStdCost" value="1400" step="0.01" readonly style="background: #f0f0f0;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title"><span class="step-number">4</span><span data-i18n="actualResults">Actual Results</span></div>
+                    <div class="wip-grid">
+                        <div class="cost-input">
+                            <label data-i18n="actualUnitsProduced">Actual Units Produced</label>
+                            <input type="number" id="abcActualProd" value="11000" step="1">
+                        </div>
+                        <div class="cost-input">
+                            <label data-i18n="actualSellingPrice">Actual Selling Price (€/unit)</label>
+                            <input type="number" id="abcActualPrice" value="2900" step="0.01">
+                        </div>
+                        <div class="cost-input">
+                            <label data-i18n="actualFixedCosts">Actual Fixed Costs (€)</label>
+                            <input type="number" id="abcActualFixed" value="2300000" step="0.01">
+                        </div>
+                    </div>
+                    
+                    <h4 style="margin-top: 20px; margin-bottom: 15px; color: var(--primary);" data-i18n="dmActual">Direct Materials - Actual</h4>
+                    <div class="wip-grid">
+                        <div class="cost-input">
+                            <label data-i18n="actualQuantityUsed">Actual Quantity Used (kg)</label>
+                            <input type="number" id="abcDMActualQty" value="264000" step="0.01">
+                        </div>
+                        <div class="cost-input">
+                            <label data-i18n="actualPrice">Actual Price (€/kg)</label>
+                            <input type="number" id="abcDMActualPrice" value="19" step="0.01">
+                        </div>
+                    </div>
+                    
+                    <h4 style="margin-top: 20px; margin-bottom: 15px; color: var(--primary);" data-i18n="dlActual">Direct Labor - Actual</h4>
+                    <div class="wip-grid">
+                        <div class="cost-input">
+                            <label data-i18n="actualHoursUsed">Actual Hours Used</label>
+                            <input type="number" id="abcDLActualHours" value="159500" step="0.01">
+                        </div>
+                        <div class="cost-input">
+                            <label data-i18n="actualRate">Actual Rate (€/hour)</label>
+                            <input type="number" id="abcDLActualRate" value="103" step="0.01">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="calculate-btn" onclick="calculateVariances()" data-i18n="calculateVariances">Calculate Variances</button>
+                </div>
+
+                <div class="results" id="varianceResults">
+                    <div class="section-title">Results</div>
+                    <div id="varianceResultsContent"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABC Costing Page -->
+        <div id="abc-page" class="page">
+            <div class="container">
+                <div style="text-align: center; margin-bottom: 25px; padding-top: 20px;">
+                    <h1 data-i18n="abcTitle">Activity-Based Costing</h1>
+                    <p class="subtitle" data-i18n="abcSubtitle">Department & Activity-Based Overhead Allocation</p>
+                </div>
+
+                <div class="section">
+                    <div class="section-title"><span class="step-number">1</span><span data-i18n="overheadData">Overhead Data</span></div>
+                    <div class="wip-grid">
+                        <div class="cost-input">
+                            <label data-i18n="totalOverhead">Total Variable Manufacturing Overhead (€)</label>
+                            <input type="number" id="abcTotalOverhead" value="308600" step="0.01">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title"><span class="step-number">2</span><span data-i18n="departments">Dipartimenti e Cost Driver</span></div>
+                    <div id="abcDepartmentsContainer"></div>
+                    <button class="calculate-btn" onclick="addABCDepartment()" style="margin-top: 15px; background: #4CAF50;">
+                        + <span data-i18n="addDepartment">Aggiungi Dipartimento</span>
+                    </button>
+                </div>
+
+                <div class="section">
+                    <div class="section-title"><span class="step-number">3</span><span data-i18n="customerUsage">Utilizzo Cost Driver per Cliente</span></div>
+                    <div id="abcCustomersContainer"></div>
+                    <button class="calculate-btn" onclick="addABCCustomer()" style="margin-top: 15px; background: #4CAF50;">
+                        + <span data-i18n="addCustomer">Aggiungi Cliente</span>
+                    </button>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="calculate-btn" onclick="calculateABC()" data-i18n="calculateABC">Calculate ABC Allocation</button>
+                </div>
+
+                <div class="results" id="abcResults">
+                    <div id="abcResultsContent"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script src="/static/translations.js?v=6"></script>
-    <script src="/static/app.js?v=6"></script>
-    <script src="/static/export.js?v=6"></script>
+    <script src="/static/translations.js?v=7"></script>
+    <script src="/static/app.js?v=7"></script>
+    <script src="/static/export.js?v=7"></script>
 </body>
 
 </html>

@@ -725,7 +725,7 @@ function displayWIPResults(data) {
 }
 
 function generateWIPProcedimento(data) {
-    let html = `<h3 style="color: #4A3B32; margin-bottom: 20px;">📚 ${t('procedimento') || 'Procedimento di Calcolo'}</h3>`;
+    let html = `<h3 style="color: #4A3B32; margin-bottom: 20px;">${t('procedimento') || 'Procedimento di Calcolo'}</h3>`;
 
     // Step 1: Physical Flow
     html += `
@@ -1154,7 +1154,7 @@ function displayBreakEvenResults(data) {
 }
 
 function generateBreakEvenProcedimento(data) {
-    let html = `<h3 style="color: #4A3B32; margin-bottom: 20px;">📚 ${t('procedimento') || 'Procedimento di Calcolo'}</h3>`;
+    let html = `<h3 style="color: #4A3B32; margin-bottom: 20px;">${t('procedimento') || 'Procedimento di Calcolo'}</h3>`;
 
     // Step 1: Input Data
     html += `
@@ -1483,3 +1483,804 @@ window.addEventListener('languageChanged', () => {
         updateSensitivity();
     }
 });
+
+
+// ============================================================================
+// VARIANCE ANALYSIS
+// ============================================================================
+// AUTO-UPDATE STANDARD UNIT COSTS
+// ============================================================================
+
+function updateDMStandardCost() {
+    const qty = parseFloat(document.getElementById('abcDMStdQty').value) || 0;
+    const price = parseFloat(document.getElementById('abcDMStdPrice').value) || 0;
+    document.getElementById('abcDMStdCost').value = (qty * price).toFixed(2);
+}
+
+function updateDLStandardCost() {
+    const hours = parseFloat(document.getElementById('abcDLStdHours').value) || 0;
+    const rate = parseFloat(document.getElementById('abcDLStdRate').value) || 0;
+    document.getElementById('abcDLStdCost').value = (hours * rate).toFixed(2);
+}
+
+// ============================================================================
+
+function calculateVariances() {
+    clearErrors();
+    
+    // Get budget data
+    const expectedProd = parseFloat(document.getElementById('abcExpectedProd').value);
+    const sellingPrice = parseFloat(document.getElementById('abcSellingPrice').value);
+    const fixedCosts = parseFloat(document.getElementById('abcFixedCosts').value);
+    
+    // Get standard costs
+    const dmStdQty = parseFloat(document.getElementById('abcDMStdQty').value);
+    const dmStdPrice = parseFloat(document.getElementById('abcDMStdPrice').value);
+    const dlStdHours = parseFloat(document.getElementById('abcDLStdHours').value);
+    const dlStdRate = parseFloat(document.getElementById('abcDLStdRate').value);
+    
+    // Get actual results
+    const actualProd = parseFloat(document.getElementById('abcActualProd').value);
+    const actualPrice = parseFloat(document.getElementById('abcActualPrice').value);
+    const actualFixed = parseFloat(document.getElementById('abcActualFixed').value);
+    const dmActualQty = parseFloat(document.getElementById('abcDMActualQty').value);
+    const dmActualPrice = parseFloat(document.getElementById('abcDMActualPrice').value);
+    const dlActualHours = parseFloat(document.getElementById('abcDLActualHours').value);
+    const dlActualRate = parseFloat(document.getElementById('abcDLActualRate').value);
+    
+    // Calculate standard unit costs
+    const dmStdCost = dmStdQty * dmStdPrice;
+    const dlStdCost = dlStdHours * dlStdRate;
+    
+    // 1. Sales Variances
+    const salesVolumeVariance = (actualProd - expectedProd) * sellingPrice;
+    const sellingPriceVariance = (actualPrice - sellingPrice) * actualProd;
+    const totalSalesVariance = salesVolumeVariance + sellingPriceVariance;
+    
+    // 2. Direct Materials Variances
+    const dmStdQtyForActual = actualProd * dmStdQty;
+    const dmPriceVariance = (dmActualPrice - dmStdPrice) * dmActualQty;
+    const dmEfficiencyVariance = (dmActualQty - dmStdQtyForActual) * dmStdPrice;
+    const dmJointVariance = (dmActualQty - dmStdQtyForActual) * (dmActualPrice - dmStdPrice);
+    const dmTotalVariance = dmPriceVariance + dmEfficiencyVariance;
+    
+    // 3. Direct Labor Variances
+    const dlStdHoursForActual = actualProd * dlStdHours;
+    const dlRateVariance = (dlActualRate - dlStdRate) * dlStdHoursForActual;
+    const dlEfficiencyVariance = (dlActualHours - dlStdHoursForActual) * dlStdRate;
+    const dlJointVariance = (dlActualRate - dlStdRate) * (dlActualHours - dlStdHoursForActual);
+    const dlTotalVariance = dlRateVariance + dlEfficiencyVariance;
+    
+    // Display results
+    displayVarianceResults({
+        salesVolumeVariance,
+        sellingPriceVariance,
+        totalSalesVariance,
+        dmPriceVariance,
+        dmEfficiencyVariance,
+        dmJointVariance,
+        dmTotalVariance,
+        dlRateVariance,
+        dlEfficiencyVariance,
+        dlJointVariance,
+        dlTotalVariance,
+        expectedProd,
+        actualProd,
+        sellingPrice,
+        actualPrice,
+        dmStdQty,
+        dmStdPrice,
+        dmActualQty,
+        dmActualPrice,
+        dlStdHours,
+        dlStdRate,
+        dlActualHours,
+        dlActualRate
+    });
+}
+
+function displayVarianceResults(data) {
+    const formatVariance = (value) => {
+        const sign = value >= 0 ? '+' : '';
+        const color = value >= 0 ? '#4caf50' : '#f44336';
+        const label = value >= 0 ? 'Favorable' : 'Unfavorable';
+        return `<span style="color: ${color}; font-weight: 600;">${sign}€${value.toFixed(2)} (${label})</span>`;
+    };
+    
+    let html = `
+        <div class="results-grid">
+            <div class="result-card">
+                <h3 data-i18n="salesVariances">Sales Variances</h3>
+                <div class="result-item">
+                    <span>Sales Volume Variance</span>
+                    <span>${formatVariance(data.salesVolumeVariance)}</span>
+                </div>
+                <div class="result-item">
+                    <span>Selling Price Variance</span>
+                    <span>${formatVariance(data.sellingPriceVariance)}</span>
+                </div>
+                <div class="result-item" style="font-weight: 600; border-top: 2px solid #e0e0e0; padding-top: 10px; margin-top: 10px;">
+                    <span>Total Sales Variance</span>
+                    <span>${formatVariance(data.totalSalesVariance)}</span>
+                </div>
+            </div>
+            
+            <div class="result-card">
+                <h3 data-i18n="dmVariances">Direct Materials Variances</h3>
+                <div class="result-item">
+                    <span>Price Variance</span>
+                    <span>${formatVariance(data.dmPriceVariance)}</span>
+                </div>
+                <div class="result-item">
+                    <span>Efficiency Variance</span>
+                    <span>${formatVariance(data.dmEfficiencyVariance)}</span>
+                </div>
+                <div class="result-item">
+                    <span>Joint Price/Efficiency</span>
+                    <span>${formatVariance(data.dmJointVariance)}</span>
+                </div>
+                <div class="result-item" style="font-weight: 600; border-top: 2px solid #e0e0e0; padding-top: 10px; margin-top: 10px;">
+                    <span>Total DM Variance</span>
+                    <span>${formatVariance(data.dmTotalVariance)}</span>
+                </div>
+            </div>
+            
+            <div class="result-card">
+                <h3 data-i18n="dlVariances">Direct Labor Variances</h3>
+                <div class="result-item">
+                    <span data-i18n="rateVariance">Rate Variance</span>
+                    <span>${formatVariance(data.dlRateVariance)}</span>
+                </div>
+                <div class="result-item">
+                    <span data-i18n="efficiencyVariance">Efficiency Variance</span>
+                    <span>${formatVariance(data.dlEfficiencyVariance)}</span>
+                </div>
+                <div class="result-item">
+                    <span data-i18n="jointVariance">Joint Rate/Efficiency</span>
+                    <span>${formatVariance(data.dlJointVariance)}</span>
+                </div>
+                <div class="result-item" style="font-weight: 600; border-top: 2px solid #e0e0e0; padding-top: 10px; margin-top: 10px;">
+                    <span data-i18n="totalDLVariance">Total DL Variance</span>
+                    <span>${formatVariance(data.dlTotalVariance)}</span>
+                </div>
+            </div>
+        </div>
+        
+        <button class="procedimento-toggle" onclick="toggleProcedimento('variance')" style="margin-top: 20px;">
+            <span data-i18n="showProcedimento">Show Procedure</span>
+        </button>
+        <div id="variance-procedimento" class="procedimento-content">
+            <h3 style="color: #4A3B32; margin-bottom: 20px;" data-i18n="calculationProcedure">Calculation Procedure</h3>
+            
+            <div class="step">
+                <div class="step-title" data-i18n="salesVariancesCalc">1. Sales Variances</div>
+                <div class="formula">
+                    <strong data-i18n="salesVolumeVariance">Sales Volume Variance:</strong><br>
+                    (Q<sub>A</sub> - Q<sub>E</sub>) × P<sub>S</sub> = (${data.actualProd} - ${data.expectedProd}) × €${data.sellingPrice} = ${formatVariance(data.salesVolumeVariance)}
+                </div>
+                <div class="formula">
+                    <strong data-i18n="sellingPriceVariance">Selling Price Variance:</strong><br>
+                    (P<sub>A</sub> - P<sub>S</sub>) × Q<sub>A</sub> = (€${data.actualPrice} - €${data.sellingPrice}) × ${data.actualProd} = ${formatVariance(data.sellingPriceVariance)}
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-title" data-i18n="dmVariancesCalc">2. Direct Materials Variances</div>
+                <div class="formula">
+                    <strong data-i18n="priceVariance">Price Variance:</strong><br>
+                    (P<sub>A</sub> - P<sub>S</sub>) × Q<sub>A</sub> = (€${data.dmActualPrice} - €${data.dmStdPrice}) × ${data.dmActualQty} kg = ${formatVariance(data.dmPriceVariance)}
+                </div>
+                <div class="formula">
+                    <strong data-i18n="efficiencyVariance">Efficiency Variance:</strong><br>
+                    (Q<sub>A</sub> - Q<sub>S</sub>) × P<sub>S</sub> = (${data.dmActualQty} - ${(data.actualProd * data.dmStdQty).toFixed(0)}) × €${data.dmStdPrice} = ${formatVariance(data.dmEfficiencyVariance)}
+                </div>
+                <div class="formula">
+                    <strong data-i18n="jointVariance">Joint Price/Efficiency:</strong><br>
+                    (P<sub>A</sub> - P<sub>S</sub>) × (Q<sub>A</sub> - Q<sub>S</sub>) = (€${data.dmActualPrice} - €${data.dmStdPrice}) × (${data.dmActualQty} - ${(data.actualProd * data.dmStdQty).toFixed(0)}) = ${formatVariance(data.dmJointVariance)}
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-title" data-i18n="dlVariancesCalc">3. Direct Labor Variances</div>
+                <div class="formula">
+                    <strong data-i18n="rateVariance">Rate Variance:</strong><br>
+                    (R<sub>A</sub> - R<sub>S</sub>) × H<sub>S</sub> = (€${data.dlActualRate} - €${data.dlStdRate}) × ${(data.actualProd * data.dlStdHours).toFixed(0)} hours = ${formatVariance(data.dlRateVariance)}
+                </div>
+                <div class="formula">
+                    <strong data-i18n="efficiencyVariance">Efficiency Variance:</strong><br>
+                    (H<sub>A</sub> - H<sub>S</sub>) × R<sub>S</sub> = (${data.dlActualHours} - ${(data.actualProd * data.dlStdHours).toFixed(0)}) × €${data.dlStdRate} = ${formatVariance(data.dlEfficiencyVariance)}
+                </div>
+                <div class="formula">
+                    <strong data-i18n="jointVariance">Joint Rate/Efficiency:</strong><br>
+                    (R<sub>A</sub> - R<sub>S</sub>) × (H<sub>A</sub> - H<sub>S</sub>) = (€${data.dlActualRate} - €${data.dlStdRate}) × (${data.dlActualHours} - ${(data.actualProd * data.dlStdHours).toFixed(0)}) = ${formatVariance(data.dlJointVariance)}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('varianceResultsContent').innerHTML = html;
+    document.getElementById('varianceResults').style.display = 'block';
+    
+    // Render LaTeX formulas
+    setTimeout(() => {
+        if (window.renderMathInElement) {
+            renderMathInElement(document.getElementById('abcResultsContent'), {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false}
+                ],
+                throwOnError: false
+            });
+        }
+    }, 100);
+    
+    document.getElementById('abcResults').scrollIntoView({ behavior: 'smooth' });
+}
+
+
+// ============================================================================
+// ABC COSTING
+// ============================================================================
+
+// Initialize ABC page with default departments and customers
+let abcDeptCount = 0;
+let abcCustCount = 0;
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('abcDepartmentsContainer')) {
+        // Add 3 default departments
+        addABCDepartment('Design', 'CAD-design-hours', 39000);
+        addABCDepartment('Production', 'Engineering-hours', 29600);
+        addABCDepartment('Engineering', 'Machine-hours', 240000);
+        
+        // Add 3 default customers
+        addABCCustomer('United Motors');
+        addABCCustomer('Holden Motors');
+        addABCCustomer('Leland Vehicle');
+        
+        // Set default usage values
+        setTimeout(() => {
+            document.getElementById('abcCust0Dept0').value = 110;
+            document.getElementById('abcCust0Dept1').value = 70;
+            document.getElementById('abcCust0Dept2').value = 120;
+            
+            document.getElementById('abcCust1Dept0').value = 200;
+            document.getElementById('abcCust1Dept1').value = 60;
+            document.getElementById('abcCust1Dept2').value = 2800;
+            
+            document.getElementById('abcCust2Dept0').value = 80;
+            document.getElementById('abcCust2Dept1').value = 240;
+            document.getElementById('abcCust2Dept2').value = 1080;
+        }, 100);
+    }
+});
+
+function addABCDepartment(name = '', driver = '', overhead = 10000) {
+    const container = document.getElementById('abcDepartmentsContainer');
+    const deptId = abcDeptCount++;
+    
+    const deptDiv = document.createElement('div');
+    deptDiv.id = `abcDept${deptId}`;
+    deptDiv.className = 'abc-dept-item';
+    deptDiv.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; margin-bottom: 15px;">
+            <h4 style="color: var(--primary); margin: 0;">
+                <span data-i18n="department">Dipartimento</span> ${deptId + 1}
+            </h4>
+            <button onclick="removeABCDepartment(${deptId})" style="background: #F44336; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                ✕ <span data-i18n="remove">Rimuovi</span>
+            </button>
+        </div>
+        <div class="wip-grid">
+            <div class="cost-input">
+                <label data-i18n="deptName">Nome Dipartimento</label>
+                <input type="text" id="abcDept${deptId}Name" value="${name || `Dept ${deptId + 1}`}" onchange="updateABCCustomerLabels()">
+            </div>
+            <div class="cost-input">
+                <label data-i18n="costDriver">Cost Driver</label>
+                <input type="text" id="abcDept${deptId}Driver" value="${driver || 'hours'}" onchange="updateABCCustomerLabels()">
+            </div>
+            <div class="cost-input">
+                <label data-i18n="deptOverhead">Overhead Dipartimento (€)</label>
+                <input type="number" id="abcDept${deptId}Overhead" value="${overhead}" step="0.01">
+            </div>
+        </div>
+    `;
+    container.appendChild(deptDiv);
+    updateAllTexts(); // Apply translations to new elements
+    updateAllABCCustomers();
+}
+
+function removeABCDepartment(deptId) {
+    const deptDiv = document.getElementById(`abcDept${deptId}`);
+    if (deptDiv) {
+        deptDiv.remove();
+        updateAllABCCustomers();
+    }
+}
+
+function addABCCustomer(name = '') {
+    const container = document.getElementById('abcCustomersContainer');
+    const custId = abcCustCount++;
+    
+    const custDiv = document.createElement('div');
+    custDiv.id = `abcCust${custId}`;
+    custDiv.className = 'abc-cust-item';
+    
+    let html = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; margin-bottom: 15px;">
+            <h4 style="color: var(--primary); margin: 0;">
+                <span data-i18n="customer">Cliente</span> ${custId + 1}
+            </h4>
+            <button onclick="removeABCCustomer(${custId})" style="background: #F44336; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                ✕ <span data-i18n="remove">Rimuovi</span>
+            </button>
+        </div>
+        <div class="wip-grid" id="abcCust${custId}Grid">
+            <div class="cost-input">
+                <label data-i18n="customerName">Nome Cliente</label>
+                <input type="text" id="abcCust${custId}Name" value="${name || `Customer ${custId + 1}`}">
+            </div>
+    `;
+    
+    // Add fields for each department
+    const deptDivs = document.querySelectorAll('.abc-dept-item');
+    deptDivs.forEach((deptDiv, idx) => {
+        const deptIdMatch = deptDiv.id.match(/abcDept(\d+)/);
+        if (deptIdMatch) {
+            const deptId = deptIdMatch[1];
+            const driverInput = document.getElementById(`abcDept${deptId}Driver`);
+            const driverName = driverInput ? driverInput.value : 'hours';
+            html += `
+                <div class="cost-input">
+                    <label>${driverName}</label>
+                    <input type="number" id="abcCust${custId}Dept${deptId}" value="100" step="1">
+                </div>
+            `;
+        }
+    });
+    
+    html += `</div>`;
+    custDiv.innerHTML = html;
+    container.appendChild(custDiv);
+    updateAllTexts(); // Apply translations to new elements
+}
+
+function removeABCCustomer(custId) {
+    const custDiv = document.getElementById(`abcCust${custId}`);
+    if (custDiv) {
+        custDiv.remove();
+    }
+}
+
+function updateABCCustomerLabels() {
+    const custDivs = document.querySelectorAll('.abc-cust-item');
+    custDivs.forEach(custDiv => {
+        const custIdMatch = custDiv.id.match(/abcCust(\d+)/);
+        if (custIdMatch) {
+            const custId = custIdMatch[1];
+            updateAllABCCustomers();
+        }
+    });
+}
+
+function updateAllABCCustomers() {
+    const custDivs = document.querySelectorAll('.abc-cust-item');
+    custDivs.forEach(custDiv => {
+        const custIdMatch = custDiv.id.match(/abcCust(\d+)/);
+        if (custIdMatch) {
+            const custId = custIdMatch[1];
+            const grid = document.getElementById(`abcCust${custId}Grid`);
+            const custName = document.getElementById(`abcCust${custId}Name`).value;
+            
+            // Save current values
+            const currentValues = {};
+            const deptDivs = document.querySelectorAll('.abc-dept-item');
+            deptDivs.forEach(deptDiv => {
+                const deptIdMatch = deptDiv.id.match(/abcDept(\d+)/);
+                if (deptIdMatch) {
+                    const deptId = deptIdMatch[1];
+                    const input = document.getElementById(`abcCust${custId}Dept${deptId}`);
+                    if (input) {
+                        currentValues[deptId] = input.value;
+                    }
+                }
+            });
+            
+            // Rebuild grid
+            let html = `
+                <div class="cost-input">
+                    <label data-i18n="customerName">Nome Cliente</label>
+                    <input type="text" id="abcCust${custId}Name" value="${custName}">
+                </div>
+            `;
+            
+            deptDivs.forEach(deptDiv => {
+                const deptIdMatch = deptDiv.id.match(/abcDept(\d+)/);
+                if (deptIdMatch) {
+                    const deptId = deptIdMatch[1];
+                    const driverInput = document.getElementById(`abcDept${deptId}Driver`);
+                    const driverName = driverInput ? driverInput.value : 'hours';
+                    const value = currentValues[deptId] || 100;
+                    html += `
+                        <div class="cost-input">
+                            <label>${driverName}</label>
+                            <input type="number" id="abcCust${custId}Dept${deptId}" value="${value}" step="1">
+                        </div>
+                    `;
+                }
+            });
+            
+            grid.innerHTML = html;
+        }
+    });
+    updateAllTexts(); // Apply translations to updated elements
+}
+
+function calculateABC() {
+    clearErrors();
+    
+    const totalOverhead = parseFloat(document.getElementById('abcTotalOverhead').value);
+    
+    // Get departments data
+    const departments = [];
+    const deptIds = [];
+    const deptDivs = document.querySelectorAll('.abc-dept-item');
+    
+    deptDivs.forEach(deptDiv => {
+        const deptIdMatch = deptDiv.id.match(/abcDept(\d+)/);
+        if (deptIdMatch) {
+            const deptId = deptIdMatch[1];
+            const name = document.getElementById(`abcDept${deptId}Name`).value;
+            const driver = document.getElementById(`abcDept${deptId}Driver`).value;
+            const overhead = parseFloat(document.getElementById(`abcDept${deptId}Overhead`).value);
+            departments.push({id: deptId, name, driver, overhead});
+            deptIds.push(deptId);
+        }
+    });
+    
+    if (departments.length === 0) {
+        alert('Aggiungi almeno un dipartimento!');
+        return;
+    }
+    
+    // Get customers data and calculate totals
+    const customers = [];
+    const custIds = [];
+    const deptTotals = new Array(departments.length).fill(0);
+    
+    const custDivs = document.querySelectorAll('.abc-cust-item');
+    custDivs.forEach(custDiv => {
+        const custIdMatch = custDiv.id.match(/abcCust(\d+)/);
+        if (custIdMatch) {
+            const custId = custIdMatch[1];
+            const name = document.getElementById(`abcCust${custId}Name`).value;
+            const usage = [];
+            
+            departments.forEach((dept, idx) => {
+                const input = document.getElementById(`abcCust${custId}Dept${dept.id}`);
+                const val = input ? parseFloat(input.value) || 0 : 0;
+                usage.push(val);
+                deptTotals[idx] += val;
+            });
+            
+            customers.push({id: custId, name, usage});
+            custIds.push(custId);
+        }
+    });
+    
+    if (customers.length === 0) {
+        alert('Aggiungi almeno un cliente!');
+        return;
+    }
+    
+    // Calculate rates
+    const rates = departments.map((dept, i) => dept.overhead / (deptTotals[i] || 1));
+    
+    // METHOD 1: Simple Costing (using machine-hours as allocation base)
+    // Find the department with "machine" in the driver name
+    const machineIdx = departments.findIndex(dept => 
+        dept.driver.toLowerCase().includes('machine')
+    );
+    
+    // If no machine-hours found, use the last department (typically Engineering with machine-hours)
+    const simpleBaseIdx = machineIdx >= 0 ? machineIdx : departments.length - 1;
+    const simple_rate = totalOverhead / (deptTotals[simpleBaseIdx] || 1);
+    const simple_allocations = customers.map(cust => simple_rate * cust.usage[simpleBaseIdx]);
+    
+    // METHOD 2: Department-Based Costing
+    const dept_allocations = customers.map(cust => {
+        return cust.usage.reduce((sum, usage, deptIdx) => sum + (usage * rates[deptIdx]), 0);
+    });
+    
+    displayABCResults({
+        totalOverhead,
+        departments,
+        customers,
+        deptTotals,
+        rates,
+        simple_rate,
+        simple_allocations,
+        dept_allocations,
+        simpleBaseIdx
+    });
+}
+
+function displayABCResults(data) {
+    // Generate customer cards dynamically
+    let customerCards = '';
+    data.customers.forEach((customer, idx) => {
+        const simpleAlloc = data.simple_allocations[idx];
+        const deptAlloc = data.dept_allocations[idx];
+        const diff = deptAlloc - simpleAlloc;
+        
+        customerCards += `
+            <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #E34A3B; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h4 style="color: #4A3B32; margin-bottom: 15px; font-size: 18px;">${customer.name}</h4>
+                <div style="margin-bottom: 12px;">
+                    <div style="color: #666; font-size: 14px;" data-i18n="simpleCosting">Simple Costing</div>
+                    <div style="color: #4A3B32; font-size: 20px; font-weight: bold;">€${simpleAlloc.toLocaleString('it-IT', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <div style="color: #666; font-size: 14px;" data-i18n="departmentCosting">Department Costing</div>
+                    <div style="color: #4A3B32; font-size: 20px; font-weight: bold;">€${deptAlloc.toLocaleString('it-IT', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                </div>
+                <div style="border-top: 2px solid #E6E2D3; padding-top: 12px; margin-top: 12px;">
+                    <div style="color: #666; font-size: 14px;" data-i18n="difference">Difference</div>
+                    <div style="color: ${diff > 0 ? '#F44336' : '#4CAF50'}; font-size: 20px; font-weight: bold;">
+                        €${diff.toLocaleString('it-IT', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                        <span style="font-size: 14px;">${diff > 0 ? '(Undercharged in Simple)' : '(Overcharged in Simple)'}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    const html = `
+        <div class="section-title" style="margin-bottom: 25px;"><span data-i18n="results">Results</span></div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
+            ${customerCards}
+        </div>
+
+        <div style="background: #E6E2D3; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+            <h3 style="color: #E34A3B; margin-bottom: 15px;">📋 <span data-i18n="analysis">Analisi dei Risultati</span></h3>
+            
+            <div style="margin-bottom: 20px; padding: 15px; background: white; border-radius: 8px; border-left: 4px solid #E34A3B;">
+                <strong style="color: #4A3B32; font-size: 16px;">📌 <span data-i18n="requirement3">Requisito 3: Analisi e Commenti</span></strong>
+                <div style="margin-top: 12px; color: #4A3B32; line-height: 1.8;">
+                    ${(() => {
+                        const overcharged = data.customers.filter((cust, idx) => 
+                            data.dept_allocations[idx] - data.simple_allocations[idx] < 0
+                        );
+                        const undercharged = data.customers.filter((cust, idx) => 
+                            data.dept_allocations[idx] - data.simple_allocations[idx] > 0
+                        );
+                        
+                        let response = '<p><strong>Who was complaining (overcharged in Simple Costing):</strong></p><div style="margin-top: 8px;">';
+                        overcharged.forEach((cust, i) => {
+                            const idx = data.customers.indexOf(cust);
+                            const diff = Math.abs(data.dept_allocations[idx] - data.simple_allocations[idx]);
+                            const pct = ((diff / data.simple_allocations[idx]) * 100).toFixed(1);
+                            response += `<p style="margin-bottom: 6px;">• <strong style="color: #F44336;">${cust.name}</strong> paid €${diff.toFixed(2)} more (${pct}% overcharged)</p>`;
+                        });
+                        response += '</div>';
+                        
+                        response += '<p style="margin-top: 10px;"><strong>Who will be unhappy (undercharged in Simple Costing):</strong></p><div style="margin-top: 8px;">';
+                        undercharged.forEach((cust, i) => {
+                            const idx = data.customers.indexOf(cust);
+                            const diff = data.dept_allocations[idx] - data.simple_allocations[idx];
+                            const pct = ((diff / data.simple_allocations[idx]) * 100).toFixed(1);
+                            response += `<p style="margin-bottom: 6px;">• <strong style="color: #F44336;">${cust.name}</strong> will pay €${diff.toFixed(2)} more (${pct}% increase)</p>`;
+                        });
+                        response += '</div>';
+                        
+                        response += '<p style="margin-top: 10px;"><em>Explanation:</em> Simple Costing distorts costs using only machine-hours as the base. ';
+                        if (overcharged.length > 0) {
+                            response += `${overcharged[0].name} uses relatively more machine-hours compared to other cost drivers, thus absorbing too much overhead. `;
+                        }
+                        response += 'Department-Based Costing reflects actual resource consumption of each department, eliminating cross-subsidization.</p>';
+                        
+                        return response;
+                    })()}
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px; padding: 15px; background: white; border-radius: 8px; border-left: 4px solid #4CAF50;">
+                <strong style="color: #4A3B32; font-size: 16px;">🎯 <span data-i18n="requirement4">Requisito 4: Come usare queste informazioni</span></strong>
+                <div style="margin-top: 12px; color: #4A3B32; line-height: 1.8;">
+                    <p><strong>The company can use department-by-department analysis to:</strong></p>
+                    <div style="margin-top: 8px;">
+                        <p style="margin-bottom: 8px;"><strong>• More accurate pricing:</strong> Price contracts based on actual resource consumption, avoiding over/under-charging customers</p>
+                        <p style="margin-bottom: 8px;"><strong>• Identify cost drivers:</strong> Understand which activities (${data.departments.map(d => d.driver).join(', ')}) drive costs in each department</p>
+                        <p style="margin-bottom: 8px;"><strong>• Improve efficiency:</strong> Focus on departments with high overhead consumption (${(() => {
+                            const maxIdx = data.departments.reduce((max, dept, idx) => 
+                                dept.overhead > data.departments[max].overhead ? idx : max, 0
+                            );
+                            return data.departments[maxIdx].name;
+                        })()}: €${Math.max(...data.departments.map(d => d.overhead)).toLocaleString()})</p>
+                        <p style="margin-bottom: 8px;"><strong>• Customer negotiations:</strong> Justify prices by showing actual resource consumption for each contract</p>
+                        <p style="margin-bottom: 8px;"><strong>• Strategic decisions:</strong> Identify profitable vs unprofitable customers based on accurate costs</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px; padding: 15px; background: white; border-radius: 8px; border-left: 4px solid #FFC107;">
+                <strong style="color: #4A3B32; font-size: 16px;">⚖️ <span data-i18n="requirement5">Requisito 5: Quando raffinare in ABC System</span></strong>
+                <div style="margin-top: 12px; color: #4A3B32; line-height: 1.8;">
+                    <p><strong style="color: #4CAF50;">✓ Worthwhile to refine into ABC when:</strong></p>
+                    <div style="margin-top: 8px;">
+                        <p style="margin-bottom: 6px;">• Departments perform <strong>heterogeneous activities</strong> that consume resources differently</p>
+                        <p style="margin-bottom: 6px;">• Overhead is <strong>significant</strong> (here: €${data.totalOverhead.toLocaleString()}, ${((data.totalOverhead / data.totalOverhead) * 100).toFixed(0)}% of total)</p>
+                        <p style="margin-bottom: 6px;">• <strong>Cost distortions are material</strong> and benefits exceed implementation costs</p>
+                        <p style="margin-bottom: 6px;">• The company needs <strong>precise pricing</strong> for competitive contracts</p>
+                        <p style="margin-bottom: 6px;">• There are <strong>customer complaints</strong> about prices (as in this case)</p>
+                    </div>
+                    
+                    <p style="margin-top: 10px;"><strong style="color: #F44336;">✗ NOT worthwhile when:</strong></p>
+                    <div style="margin-top: 8px;">
+                        <p style="margin-bottom: 6px;">• Department activities are <strong>relatively uniform</strong></p>
+                        <p style="margin-bottom: 6px;">• Overhead is <strong>minimal</strong> compared to total costs</p>
+                        <p style="margin-bottom: 6px;">• <strong>ABC implementation cost</strong> exceeds benefits</p>
+                        <p style="margin-bottom: 6px;">• Products/services consume resources in <strong>similar proportions</strong></p>
+                        <p style="margin-bottom: 6px;">• No strategic decisions require more accurate costs</p>
+                    </div>
+                    
+                    <p style="margin-top: 10px;"><em><strong>In the specific case:</strong> ${(() => {
+                        const maxDiff = Math.max(...data.customers.map((cust, idx) => 
+                            Math.abs(data.dept_allocations[idx] - data.simple_allocations[idx])
+                        ));
+                        const maxDiffPct = Math.max(...data.customers.map((cust, idx) => 
+                            Math.abs((data.dept_allocations[idx] - data.simple_allocations[idx]) / data.simple_allocations[idx] * 100)
+                        ));
+                        
+                        if (maxDiffPct > 15) {
+                            return `Distortions are significant (up to ${maxDiffPct.toFixed(1)}%), therefore <strong style="color: #4CAF50;">worthwhile</strong> to implement ABC.`;
+                        } else if (maxDiffPct > 5) {
+                            return `Distortions are moderate (up to ${maxDiffPct.toFixed(1)}%). Evaluate costs/benefits of ABC implementation.`;
+                        } else {
+                            return `Distortions are minimal (up to ${maxDiffPct.toFixed(1)}%). Probably <strong style="color: #F44336;">not worthwhile</strong> to implement ABC.`;
+                        }
+                    })()}</em></p>
+                </div>
+            </div>
+        </div>
+
+        <button class="procedimento-toggle" onclick="toggleABCProcedimento()" style="margin-top: 20px;">
+            <span data-i18n="showProcedimento">Mostra Procedimento</span>
+        </button>
+        <div id="abc-procedimento" class="procedimento-content">
+            <h3 style="color: #4A3B32; margin-bottom: 20px;" data-i18n="calculationProcedure">Procedimento di Calcolo</h3>
+
+            <div class="variance-summary">
+                <div class="section-title">
+                    <span class="step-number">1</span>
+                    <span data-i18n="simpleCosting">Simple Costing</span>
+                </div>
+                <p style="color: #666; margin-bottom: 15px; font-style: italic;">
+                    Allocation based on machine-hours (${data.departments[data.simpleBaseIdx].driver})
+                </p>
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #E34A3B;">
+                    <div style="font-size: 14px; color: #666; margin-bottom: 8px;" data-i18n="rateCalculation">Calcolo del tasso:</div>
+                    <div style="font-family: monospace; font-size: 16px; color: #4A3B32;">
+                        €${data.totalOverhead.toLocaleString()} ÷ ${data.deptTotals[data.simpleBaseIdx]} ${data.departments[data.simpleBaseIdx].driver} = <strong style="color: #E34A3B;">€${data.simple_rate.toFixed(2)}/${data.departments[data.simpleBaseIdx].driver}</strong>
+                    </div>
+                </div>
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>${data.departments[data.simpleBaseIdx].driver}</th>
+                            <th data-i18n="allocatedOverhead">Allocated Overhead</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.customers.map((cust, idx) => `
+                            <tr>
+                                <td>${cust.name}</td>
+                                <td>${cust.usage[data.simpleBaseIdx]}</td>
+                                <td>€${data.simple_allocations[idx].toFixed(2)}</td>
+                            </tr>
+                        `).join('')}
+                        <tr class="total-row">
+                            <td><strong>TOTAL</strong></td>
+                            <td><strong>${data.deptTotals[data.simpleBaseIdx]}</strong></td>
+                            <td><strong>€${data.simple_allocations.reduce((a,b) => a+b, 0).toFixed(2)}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="variance-summary" style="margin-top: 30px;">
+                <div class="section-title">
+                    <span class="step-number">2</span>
+                    <span data-i18n="departmentCosting">Department-Based Costing</span>
+                </div>
+                <p style="color: #666; margin-bottom: 15px; font-style: italic;">
+                    Allocation using specific cost drivers for each department
+                </p>
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #E34A3B;">
+                    <div style="font-size: 14px; color: #666; margin-bottom: 8px;" data-i18n="rateCalculation">Calcolo dei tassi per dipartimento:</div>
+                    <div style="font-family: monospace; font-size: 14px; color: #4A3B32; line-height: 1.8;">
+                        ${data.departments.map((dept, idx) => `
+                            <div><strong>${dept.name}:</strong> €${dept.overhead.toLocaleString()} ÷ ${data.deptTotals[idx]} ${dept.driver} = <strong style="color: #E34A3B;">€${data.rates[idx].toFixed(2)}/${dept.driver}</strong></div>
+                        `).join('')}
+                    </div>
+                </div>
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            ${data.departments.map(dept => `<th>${dept.driver}</th>`).join('')}
+                            <th data-i18n="allocatedOverhead">Allocated Overhead</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.customers.map((cust, idx) => `
+                            <tr>
+                                <td>${cust.name}</td>
+                                ${cust.usage.map(u => `<td>${u}</td>`).join('')}
+                                <td>€${data.dept_allocations[idx].toFixed(2)}</td>
+                            </tr>
+                        `).join('')}
+                        <tr class="total-row">
+                            <td><strong>TOTAL</strong></td>
+                            ${data.deptTotals.map(t => `<td><strong>${t}</strong></td>`).join('')}
+                            <td><strong>€${data.dept_allocations.reduce((a,b) => a+b, 0).toFixed(2)}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="variance-summary" style="margin-top: 30px;">
+                <div class="section-title">
+                    <span class="step-number">3</span>
+                    <span data-i18n="comparison">Confronto tra i Metodi</span>
+                </div>
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th data-i18n="simpleCosting">Simple Costing</th>
+                            <th data-i18n="departmentCosting">Department Costing</th>
+                            <th data-i18n="difference">Difference</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.customers.map((cust, idx) => {
+                            const diff = data.dept_allocations[idx] - data.simple_allocations[idx];
+                            return `
+                                <tr>
+                                    <td>${cust.name}</td>
+                                    <td>€${data.simple_allocations[idx].toFixed(2)}</td>
+                                    <td>€${data.dept_allocations[idx].toFixed(2)}</td>
+                                    <td class="${diff > 0 ? 'unfavorable' : 'favorable'}">€${diff.toFixed(2)}</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('abcResultsContent').innerHTML = html;
+    document.getElementById('abcResults').style.display = 'block';
+    updateAllTexts(); // Apply translations to results
+    document.getElementById('abcResults').scrollIntoView({ behavior: 'smooth' });
+}
+
+function toggleABCProcedimento() {
+    const content = document.getElementById('abc-procedimento');
+    const button = event.target.closest('button');
+    
+    if (content.style.display === 'none' || content.style.display === '') {
+        content.style.display = 'block';
+        button.querySelector('span').setAttribute('data-i18n', 'hideProcedimento');
+        button.querySelector('span').textContent = t('hideProcedimento');
+    } else {
+        content.style.display = 'none';
+        button.querySelector('span').setAttribute('data-i18n', 'showProcedimento');
+        button.querySelector('span').textContent = t('showProcedimento');
+    }
+}
