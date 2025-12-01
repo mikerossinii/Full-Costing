@@ -540,6 +540,10 @@ function calculateWIP() {
     const started = parseFloat(document.getElementById('wipStarted').value);
     const completed = parseFloat(document.getElementById('wipCompleted').value);
     const endingCC = parseFloat(document.getElementById('wipEndingCC').value);
+    
+    // Transferred in units (optional, for subsequent departments)
+    const transferredUnits = parseFloat(document.getElementById('wipTransferredUnits').value) || 0;
+    const transferredCost = parseFloat(document.getElementById('wipTransferredCost').value) || 0;
 
     // Validation
     if (isNaN(materials) || materials < 0) {
@@ -576,7 +580,9 @@ function calculateWIP() {
             opening_conversion: openingConversion,
             started,
             completed,
-            ending_cc: endingCC
+            ending_cc: endingCC,
+            transferred_units: transferredUnits,
+            transferred_cost: transferredCost
         })
     })
         .then(response => response.json())
@@ -606,10 +612,17 @@ function displayWIPResults(data) {
                     <span data-i18n="openingWIPLabel">${t('openingWIPLabel')}</span>
                     <span>${data.physical_flow.opening_wip} ${t('units')}</span>
                 </div>
+                ${data.physical_flow.transferred_in > 0 ? `
+                <div class="result-item" style="background: #fff3e0;">
+                    <span data-i18n="transferredInUnits">${t('transferredInUnits')}</span>
+                    <span>${data.physical_flow.transferred_in} ${t('units')}</span>
+                </div>
+                ` : `
                 <div class="result-item">
                     <span data-i18n="started">${t('started')}</span>
                     <span>${data.physical_flow.started} ${t('units')}</span>
                 </div>
+                `}
                 <div class="result-item">
                     <span data-i18n="completed">${t('completed')}</span>
                     <span>${data.physical_flow.completed} ${t('units')}</span>
@@ -669,9 +682,15 @@ function displayWIPResults(data) {
             
             <div class="detail-section" style="background: #e3f2fd; border-left-color: #2196f3;">
                 <h4>2️⃣ ${t('startedAndCompleted')} (${data.fifo_breakdown.started_and_completed.units} ${t('units')})</h4>
+                ${data.fifo_breakdown.started_and_completed.transferred > 0 ? `
+                <div class="allocation-detail">DM: ${data.fifo_breakdown.started_and_completed.units} × €${data.cost_per_eu.materials.toFixed(4)} = €${data.fifo_breakdown.started_and_completed.dm.toFixed(2)}</div>
+                <div class="allocation-detail">CC: ${data.fifo_breakdown.started_and_completed.units} × €${data.cost_per_eu.conversion.toFixed(4)} = €${data.fifo_breakdown.started_and_completed.cc.toFixed(2)}</div>
+                <div class="allocation-detail" style="background: #fff3e0; padding: 5px; border-radius: 4px;">Transferred In: ${data.fifo_breakdown.started_and_completed.units} × €${data.cost_per_transferred_unit.toFixed(2)} = €${data.fifo_breakdown.started_and_completed.transferred.toFixed(2)}</div>
+                ` : `
                 <div class="allocation-detail">
                     ${data.fifo_breakdown.started_and_completed.units} ${t('units')} × €${data.cost_per_eu.total.toFixed(4)}/${t('unit')}
                 </div>
+                `}
                 <div class="allocation-detail" style="font-weight: 600; color: #2196f3; margin-top: 10px; font-size: 1.1em;">
                     ${t('totalStartedCompleted')}: €${data.fifo_breakdown.started_and_completed.cost.toFixed(2)}
                 </div>
@@ -681,6 +700,9 @@ function displayWIPResults(data) {
                 <h4>3️⃣ ${t('endingWIPSection')} (${data.fifo_breakdown.ending_wip.units} ${t('units')})</h4>
                 <div class="allocation-detail">DM (100%): ${data.fifo_breakdown.ending_wip.units} × €${data.cost_per_eu.materials.toFixed(4)} = €${data.fifo_breakdown.ending_wip.dm.toFixed(2)}</div>
                 <div class="allocation-detail">CC (${(data.physical_flow.ending_wip > 0 ? (data.valuation.ending_wip_conversion / data.cost_per_eu.conversion / data.physical_flow.ending_wip * 100) : 0).toFixed(0)}%): ${data.fifo_breakdown.ending_wip.units} × ${(data.physical_flow.ending_wip > 0 ? (data.valuation.ending_wip_conversion / data.cost_per_eu.conversion / data.physical_flow.ending_wip) : 0).toFixed(2)} × €${data.cost_per_eu.conversion.toFixed(4)} = €${data.fifo_breakdown.ending_wip.cc.toFixed(2)}</div>
+                ${data.fifo_breakdown.ending_wip.transferred > 0 ? `
+                <div class="allocation-detail" style="background: #fff3e0; padding: 5px; border-radius: 4px;">Transferred In: ${data.fifo_breakdown.ending_wip.units} × €${data.cost_per_transferred_unit.toFixed(2)} = €${data.fifo_breakdown.ending_wip.transferred.toFixed(2)}</div>
+                ` : ''}
                 <div class="allocation-detail" style="font-weight: 600; color: #ff9800; margin-top: 10px; font-size: 1.1em;">
                     ${t('totalEndingWIP')}: €${data.fifo_breakdown.ending_wip.total.toFixed(2)}
                 </div>

@@ -143,11 +143,25 @@ def calculate_wip():
         completed = data['completed']
         ending_cc = data['ending_cc'] / 100.0
         
+        # Transferred in units (for subsequent departments)
+        transferred_units = data.get('transferred_units', 0)
+        transferred_cost = data.get('transferred_cost', 0)
+        
         # Calculate ending WIP units
-        ending_wip = opening_units + started - completed
+        # If there are transferred units, they replace "started" units
+        if transferred_units > 0:
+            ending_wip = opening_units + transferred_units - completed
+        else:
+            ending_wip = opening_units + started - completed
         
         # Started and completed units (units that started AND completed in this period)
-        started_and_completed = completed - opening_units
+        # If transferred units exist, use them instead of started
+        if transferred_units > 0:
+            started_and_completed = completed - opening_units
+            actual_started = transferred_units
+        else:
+            started_and_completed = completed - opening_units
+            actual_started = started
         
         # Calculate equivalent units based on method
         if method == 'FIFO':
@@ -159,22 +173,33 @@ def calculate_wip():
             eu_conversion = (opening_units * (1 - opening_cc)) + started_and_completed + (ending_wip * ending_cc)
             
             # Cost per EU (only current period costs)
-            cost_per_eu_materials = materials / eu_materials
-            cost_per_eu_conversion = conversion / eu_conversion
+            cost_per_eu_materials = materials / eu_materials if eu_materials > 0 else 0
+            cost_per_eu_conversion = conversion / eu_conversion if eu_conversion > 0 else 0
+            
+            # Calculate transferred in cost per unit if applicable
+            if transferred_units > 0:
+                cost_per_transferred_unit = transferred_cost / transferred_units
+            else:
+                cost_per_transferred_unit = 0
             
             # FIFO Valuation - 3 parts
             # 1. Completing Opening WIP
             completing_opening_dm = 0  # Materials already added in opening
             completing_opening_cc = opening_units * (1 - opening_cc) * cost_per_eu_conversion
+            # Note: Opening WIP already includes transferred cost from previous period
             completing_opening_total = opening_materials + opening_conversion + completing_opening_cc
             
             # 2. Started and Completed
-            started_completed_cost = started_and_completed * (cost_per_eu_materials + cost_per_eu_conversion)
+            started_completed_dm = started_and_completed * cost_per_eu_materials
+            started_completed_cc = started_and_completed * cost_per_eu_conversion
+            started_completed_transferred = started_and_completed * cost_per_transferred_unit
+            started_completed_cost = started_completed_dm + started_completed_cc + started_completed_transferred
             
             # 3. Ending WIP
             ending_wip_materials = ending_wip * cost_per_eu_materials
             ending_wip_conversion = ending_wip * ending_cc * cost_per_eu_conversion
-            ending_wip_total = ending_wip_materials + ending_wip_conversion
+            ending_wip_transferred = ending_wip * cost_per_transferred_unit
+            ending_wip_total = ending_wip_materials + ending_wip_conversion + ending_wip_transferred
             
             # Total finished goods
             finished_goods = completing_opening_total + started_completed_cost
@@ -216,19 +241,21 @@ def calculate_wip():
             completing_opening_total = 0
             started_completed_cost = 0
         
-        # Total costs
-        total_costs = opening_materials + opening_conversion + materials + conversion
+        # Total costs (include transferred in costs if present)
+        total_costs = opening_materials + opening_conversion + materials + conversion + transferred_cost
         
         result = {
             'success': True,
             'method': method,
             'physical_flow': {
                 'opening_wip': opening_units,
-                'started': started,
+                'started': actual_started,
+                'transferred_in': transferred_units,
                 'completed': completed,
                 'started_and_completed': started_and_completed,
                 'ending_wip': ending_wip
             },
+            'transferred_in_cost': float(transferred_cost),
             'equivalent_units': {
                 'materials': float(eu_materials),
                 'conversion': float(eu_conversion)
@@ -249,7 +276,7 @@ def calculate_wip():
         
         # Add FIFO-specific breakdown
         if method == 'FIFO':
-            result['fifo_breakdown'] = {
+            fifo_data = {
                 'completing_opening': {
                     'opening_dm': float(opening_materials),
                     'opening_cc': float(opening_conversion),
@@ -258,15 +285,25 @@ def calculate_wip():
                 },
                 'started_and_completed': {
                     'units': started_and_completed,
+                    'dm': float(started_completed_dm) if transferred_units > 0 else 0,
+                    'cc': float(started_completed_cc) if transferred_units > 0 else 0,
+                    'transferred': float(started_completed_transferred) if transferred_units > 0 else 0,
                     'cost': float(started_completed_cost)
                 },
                 'ending_wip': {
                     'units': ending_wip,
                     'dm': float(ending_wip_materials),
                     'cc': float(ending_wip_conversion),
+                    'transferred': float(ending_wip_transferred) if transferred_units > 0 else 0,
                     'total': float(ending_wip_total)
                 }
             }
+            
+            # Add cost per transferred unit if applicable
+            if transferred_units > 0:
+                result['cost_per_transferred_unit'] = float(cost_per_transferred_unit)
+            
+            result['fifo_breakdown'] = fifo_data
         
         return jsonify(result)
         
