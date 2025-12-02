@@ -1563,12 +1563,12 @@ function calculateVariances() {
     const dmStdQtyForActual = actualProd * dmStdQty;
     const dmPriceVariance = (dmActualPrice - dmStdPrice) * dmActualQty;
     const dmEfficiencyVariance = (dmActualQty - dmStdQtyForActual) * dmStdPrice;
-    const dmJointVariance = (dmActualQty - dmStdQtyForActual) * (dmActualPrice - dmStdPrice);
+    const dmJointVariance = (dmActualPrice - dmStdPrice) * (dmActualQty - dmStdQtyForActual);
     const dmTotalVariance = dmPriceVariance + dmEfficiencyVariance;
     
     // 3. Direct Labor Variances
     const dlStdHoursForActual = actualProd * dlStdHours;
-    const dlRateVariance = (dlActualRate - dlStdRate) * dlStdHoursForActual;
+    const dlRateVariance = (dlActualRate - dlStdRate) * dlActualHours;
     const dlEfficiencyVariance = (dlActualHours - dlStdHoursForActual) * dlStdRate;
     const dlJointVariance = (dlActualRate - dlStdRate) * (dlActualHours - dlStdHoursForActual);
     const dlTotalVariance = dlRateVariance + dlEfficiencyVariance;
@@ -1602,10 +1602,22 @@ function calculateVariances() {
 }
 
 function displayVarianceResults(data) {
-    const formatVariance = (value) => {
+    // For revenue variances: positive = favorable
+    // For cost variances: negative = favorable (cost reduction)
+    const formatVariance = (value, isCost = false) => {
         const sign = value >= 0 ? '+' : '';
-        const color = value >= 0 ? '#4caf50' : '#f44336';
-        const label = value >= 0 ? 'Favorable' : 'Unfavorable';
+        let isFavorable;
+        
+        if (isCost) {
+            // For costs: negative (reduction) is favorable
+            isFavorable = value <= 0;
+        } else {
+            // For revenues: positive (increase) is favorable
+            isFavorable = value >= 0;
+        }
+        
+        const color = isFavorable ? '#4caf50' : '#f44336';
+        const label = isFavorable ? 'Favorable' : 'Unfavorable';
         return `<span style="color: ${color}; font-weight: 600;">${sign}€${value.toFixed(2)} (${label})</span>`;
     };
     
@@ -1631,19 +1643,19 @@ function displayVarianceResults(data) {
                 <h3 data-i18n="dmVariances">Direct Materials Variances</h3>
                 <div class="result-item">
                     <span>Price Variance</span>
-                    <span>${formatVariance(data.dmPriceVariance)}</span>
+                    <span>${formatVariance(data.dmPriceVariance, true)}</span>
                 </div>
                 <div class="result-item">
                     <span>Efficiency Variance</span>
-                    <span>${formatVariance(data.dmEfficiencyVariance)}</span>
+                    <span>${formatVariance(data.dmEfficiencyVariance, true)}</span>
                 </div>
                 <div class="result-item">
                     <span>Joint Price/Efficiency</span>
-                    <span>${formatVariance(data.dmJointVariance)}</span>
+                    <span>${formatVariance(data.dmJointVariance, true)}</span>
                 </div>
                 <div class="result-item" style="font-weight: 600; border-top: 2px solid #e0e0e0; padding-top: 10px; margin-top: 10px;">
                     <span>Total DM Variance</span>
-                    <span>${formatVariance(data.dmTotalVariance)}</span>
+                    <span>${formatVariance(data.dmTotalVariance, true)}</span>
                 </div>
             </div>
             
@@ -1651,19 +1663,19 @@ function displayVarianceResults(data) {
                 <h3 data-i18n="dlVariances">Direct Labor Variances</h3>
                 <div class="result-item">
                     <span data-i18n="rateVariance">Rate Variance</span>
-                    <span>${formatVariance(data.dlRateVariance)}</span>
+                    <span>${formatVariance(data.dlRateVariance, true)}</span>
                 </div>
                 <div class="result-item">
                     <span data-i18n="efficiencyVariance">Efficiency Variance</span>
-                    <span>${formatVariance(data.dlEfficiencyVariance)}</span>
+                    <span>${formatVariance(data.dlEfficiencyVariance, true)}</span>
                 </div>
                 <div class="result-item">
                     <span data-i18n="jointVariance">Joint Rate/Efficiency</span>
-                    <span>${formatVariance(data.dlJointVariance)}</span>
+                    <span>${formatVariance(data.dlJointVariance, true)}</span>
                 </div>
                 <div class="result-item" style="font-weight: 600; border-top: 2px solid #e0e0e0; padding-top: 10px; margin-top: 10px;">
                     <span data-i18n="totalDLVariance">Total DL Variance</span>
-                    <span>${formatVariance(data.dlTotalVariance)}</span>
+                    <span>${formatVariance(data.dlTotalVariance, true)}</span>
                 </div>
             </div>
         </div>
@@ -1690,15 +1702,15 @@ function displayVarianceResults(data) {
                 <div class="step-title" data-i18n="dmVariancesCalc">2. Direct Materials Variances</div>
                 <div class="formula">
                     <strong data-i18n="priceVariance">Price Variance:</strong><br>
-                    (P<sub>A</sub> - P<sub>S</sub>) × Q<sub>A</sub> = (€${data.dmActualPrice} - €${data.dmStdPrice}) × ${data.dmActualQty} kg = ${formatVariance(data.dmPriceVariance)}
+                    (P<sub>A</sub> - P<sub>S</sub>) × Q<sub>A</sub> = (€${data.dmActualPrice} - €${data.dmStdPrice}) × ${data.dmActualQty} kg = ${formatVariance(data.dmPriceVariance, true)}
                 </div>
                 <div class="formula">
                     <strong data-i18n="efficiencyVariance">Efficiency Variance:</strong><br>
-                    (Q<sub>A</sub> - Q<sub>S</sub>) × P<sub>S</sub> = (${data.dmActualQty} - ${(data.actualProd * data.dmStdQty).toFixed(0)}) × €${data.dmStdPrice} = ${formatVariance(data.dmEfficiencyVariance)}
+                    (Q<sub>A</sub> - Q<sub>S</sub>) × P<sub>S</sub> = (${data.dmActualQty} - ${(data.actualProd * data.dmStdQty).toFixed(0)}) × €${data.dmStdPrice} = ${formatVariance(data.dmEfficiencyVariance, true)}
                 </div>
                 <div class="formula">
                     <strong data-i18n="jointVariance">Joint Price/Efficiency:</strong><br>
-                    (P<sub>A</sub> - P<sub>S</sub>) × (Q<sub>A</sub> - Q<sub>S</sub>) = (€${data.dmActualPrice} - €${data.dmStdPrice}) × (${data.dmActualQty} - ${(data.actualProd * data.dmStdQty).toFixed(0)}) = ${formatVariance(data.dmJointVariance)}
+                    (P<sub>A</sub> - P<sub>S</sub>) × (Q<sub>A</sub> - Q<sub>S</sub>) = (€${data.dmActualPrice} - €${data.dmStdPrice}) × (${data.dmActualQty} - ${(data.actualProd * data.dmStdQty).toFixed(0)}) = ${formatVariance(data.dmJointVariance, true)}
                 </div>
             </div>
             
@@ -1706,15 +1718,15 @@ function displayVarianceResults(data) {
                 <div class="step-title" data-i18n="dlVariancesCalc">3. Direct Labor Variances</div>
                 <div class="formula">
                     <strong data-i18n="rateVariance">Rate Variance:</strong><br>
-                    (R<sub>A</sub> - R<sub>S</sub>) × H<sub>S</sub> = (€${data.dlActualRate} - €${data.dlStdRate}) × ${(data.actualProd * data.dlStdHours).toFixed(0)} hours = ${formatVariance(data.dlRateVariance)}
+                    (R<sub>A</sub> - R<sub>S</sub>) × H<sub>A</sub> = (€${data.dlActualRate} - €${data.dlStdRate}) × ${data.dlActualHours} hours = ${formatVariance(data.dlRateVariance, true)}
                 </div>
                 <div class="formula">
                     <strong data-i18n="efficiencyVariance">Efficiency Variance:</strong><br>
-                    (H<sub>A</sub> - H<sub>S</sub>) × R<sub>S</sub> = (${data.dlActualHours} - ${(data.actualProd * data.dlStdHours).toFixed(0)}) × €${data.dlStdRate} = ${formatVariance(data.dlEfficiencyVariance)}
+                    (H<sub>A</sub> - H<sub>S</sub>) × R<sub>S</sub> = (${data.dlActualHours} - ${(data.actualProd * data.dlStdHours).toFixed(0)}) × €${data.dlStdRate} = ${formatVariance(data.dlEfficiencyVariance, true)}
                 </div>
                 <div class="formula">
                     <strong data-i18n="jointVariance">Joint Rate/Efficiency:</strong><br>
-                    (R<sub>A</sub> - R<sub>S</sub>) × (H<sub>A</sub> - H<sub>S</sub>) = (€${data.dlActualRate} - €${data.dlStdRate}) × (${data.dlActualHours} - ${(data.actualProd * data.dlStdHours).toFixed(0)}) = ${formatVariance(data.dlJointVariance)}
+                    (R<sub>A</sub> - R<sub>S</sub>) × (H<sub>A</sub> - H<sub>S</sub>) = (€${data.dlActualRate} - €${data.dlStdRate}) × (${data.dlActualHours} - ${(data.actualProd * data.dlStdHours).toFixed(0)}) = ${formatVariance(data.dlJointVariance, true)}
                 </div>
             </div>
         </div>
